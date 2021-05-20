@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/fragment_buysell_list"
+    tools:context=".BuySellListFragment">
+
+    <TextView
+        android:id="@+id/tvBuySellFragmentSymbolName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SYMBOL_NAME"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvTotalPiecesText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Toplam Adet: "
+        android:textStyle="italic"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvBuySellFragmentSymbolName" />
+
+    <TextView
+        android:id="@+id/tvTotalPiecesNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0000"
+        app:layout_constraintStart_toEndOf="@+id/tvTotalPiecesText"
+        app:layout_constraintTop_toBottomOf="@+id/tvBuySellFragmentSymbolName" />
+
+    <TextView
+        android:id="@+id/tvTotalCostText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Toplam Maliyet: "
+        android:textStyle="italic"
+        app:layout_constraintEnd_toStartOf="@+id/tvTotalCostValue"
+        app:layout_constraintTop_toBottomOf="@+id/tvBuySellFragmentSymbolName" />
+
+    <TextView
+        android:id="@+id/tvTotalCostValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0000.00"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvBuySellFragmentSymbolName" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvBuySellList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvTotalPiecesText" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <corners android:radius="9dp"/>
+    <gradient android:startColor="@color/item_buysell_list_start_color"
+        android:centerColor="@color/item_buysell_list_center_color"
+        android:endColor="@color/item_buysell_list_end_color"
+        android:width="1px"
+        android:angle="90"/>
+</shape>

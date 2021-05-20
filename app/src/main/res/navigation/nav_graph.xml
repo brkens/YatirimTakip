@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/SymbolListFragment">
+
+    <fragment
+        android:id="@+id/SymbolListFragment"
+        android:name="com.bebsoft.yatirimtakip.SymbolListFragment"
+        android:label="@string/symbol_list_fragment_label"
+        tools:layout="@layout/fragment_symbol_list">
+
+        <action
+            android:id="@+id/action_SymbolListFragment_to_BuySellListFragment"
+            app:destination="@id/BuySellListFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/BuySellListFragment"
+        android:name="com.bebsoft.yatirimtakip.BuySellListFragment"
+        android:label="@string/buysell_list_fragment_label"
+        tools:layout="@layout/fragment_buysell_list">
+
+        <action
+            android:id="@+id/action_BuySellListFragment_to_SymbolListFragment"
+            app:destination="@id/SymbolListFragment" />
+        <argument
+            android:name="currentSymbol"
+            app:argType="string" />
+    </fragment>
+</navigation>

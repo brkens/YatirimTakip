@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">YatirimTakip</string>
+    <string name="action_add_symbol">Sembol Ekle</string>
+    <string name="action_add_buy_sell">Alım Satım Gir</string>
+    <string name="action_see_total">Toplamı Gör</string>
+    <string name="action_export">Dışa Aktar</string>
+    <string name="action_import">İçe Aktar</string>
+    <string name="symbol_list_fragment_label">Sembol Listesi</string>
+    <string name="buysell_list_fragment_label">Alım/Satım Listesi</string>
+</resources>
