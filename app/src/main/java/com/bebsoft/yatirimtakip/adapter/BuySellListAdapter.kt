@@ -7,12 +7,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.bebsoft.yatirimtakip.DataProvider
+import com.bebsoft.yatirimtakip.database.DataProvider
 import com.bebsoft.yatirimtakip.R
 import com.bebsoft.yatirimtakip.database.BuySell
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class BuySellListAdapter (
-    val buySellList : MutableList<BuySell>
+    var buySellList : MutableList<BuySell>
 ) : RecyclerView.Adapter<BuySellListAdapter.BuySellViewHolder>() {
 
     class BuySellViewHolder(itemView : View) : RecyclerView.ViewHolder(itemView)
@@ -48,7 +50,9 @@ class BuySellListAdapter (
             alert.setTitle("Emin misiniz?")
             alert.setMessage(message)
             alert.setPositiveButton("Evet") {_, _ ->
-                DataProvider.deleteBuySellRecord(curItem.recordID)
+                GlobalScope.launch {
+                    DataProvider.deleteBuySellRecord(curItem.recordID)
+                }
 
                 buySellList.removeIf {
                         x: BuySell -> x.recordID == curItem.recordID

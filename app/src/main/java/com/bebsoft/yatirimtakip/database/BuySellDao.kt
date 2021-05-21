@@ -8,14 +8,14 @@ import androidx.room.Query
 interface BuySellDao {
 
     @Insert
-    fun insert(record: BuySell)
+    suspend fun insert(record: BuySell) : Long
 
     @Query("SELECT * FROM buy_sell_table WHERE fk_symbol_id = :symbolID ORDER BY date_time DESC")
-    fun getBuySellRecords(symbolID : Long) : List<BuySell>
+    suspend fun getBuySellRecords(symbolID : Long) : List<BuySell>
 
     @Query("DELETE FROM buy_sell_table WHERE record_id = :recordID")
-    fun deleteBuySellRecord(recordID: Long)
+    suspend fun deleteBuySellRecord(recordID: Long)
 
     @Query("SELECT SUM(total_cost) FROM buy_sell_table")
-    fun getTotalInvestment() : Double
+    suspend fun getTotalInvestment() : Double
 }

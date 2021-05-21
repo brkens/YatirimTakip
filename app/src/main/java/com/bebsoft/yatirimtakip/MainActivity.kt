@@ -1,31 +1,55 @@
 package com.bebsoft.yatirimtakip
 
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
+import android.icu.text.SimpleDateFormat
 import android.os.Bundle
-import android.view.LayoutInflater
+import android.text.format.DateFormat
+import android.view.*
+import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
-import android.view.Menu
-import android.view.MenuItem
-import android.widget.Button
-import android.widget.EditText
-import androidx.appcompat.app.AlertDialog
 import com.bebsoft.yatirimtakip.adapter.BuySellListAdapter
 import com.bebsoft.yatirimtakip.adapter.SymbolListAdapter
 import com.bebsoft.yatirimtakip.database.BuySell
+import com.bebsoft.yatirimtakip.database.DataProvider
 import com.bebsoft.yatirimtakip.database.InvestDatabase
 import com.bebsoft.yatirimtakip.database.Symbol
 import com.bebsoft.yatirimtakip.databinding.ActivityMainBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.*
 
-class MainActivity : AppCompatActivity() {
+
+class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
+    TimePickerDialog.OnTimeSetListener {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
 
     private lateinit var symbolListAdapter: SymbolListAdapter
     private lateinit var buySellListAdapter: BuySellListAdapter
+
+    private lateinit var buySellDialogView: View
+
+    private var selectedBuySellSymbol = "NULL"
+
+    private var day = 0
+    private var month: Int = 0
+    private var year: Int = 0
+    private var hour: Int = 0
+    private var minute: Int = 0
+    private var myDay = 0
+    private var myMonth: Int = 0
+    private var myYear: Int = 0
+    private var myHour: Int = 0
+    private var myMinute: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,8 +70,6 @@ class MainActivity : AppCompatActivity() {
         menuInflater.inflate(R.menu.menu_add_symbol, menu)
         menuInflater.inflate(R.menu.menu_add_buy_sell, menu)
         menuInflater.inflate(R.menu.menu_see_total, menu)
-        menuInflater.inflate(R.menu.menu_export, menu)
-        menuInflater.inflate(R.menu.menu_import, menu)
         return true
     }
 
@@ -57,16 +79,19 @@ class MainActivity : AppCompatActivity() {
                 addSymbolDialog()
             }
             R.id.action_add_buy_sell -> {
-                //TODO
+                if (selectedBuySellSymbol == "NULL") {
+                    val alertDialog = AlertDialog.Builder(this)
+                    alertDialog.setTitle("Uyarı")
+                    alertDialog.setMessage("Al/Sat kaydı girebilmek için listeden bir sembol seçiniz!")
+                    alertDialog.setCancelable(false)
+                    alertDialog.setNeutralButton("Tamam") { _, _ ->  }
+                    alertDialog.show()
+                } else {
+                    addBuySellDialog()
+                }
             }
             R.id.action_see_total -> {
                 showTotalInvestmentDialog()
-            }
-            R.id.action_export -> {
-                //TODO
-            }
-            R.id.action_import -> {
-                //TODO
             }
         }
 
@@ -74,38 +99,117 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addSymbolDialog() {
-        val mDialogView = LayoutInflater.from(applicationContext).inflate(R.layout.dialog_add_symbol, null, false)
-        val mBuilder = AlertDialog.Builder(this).setView(mDialogView).setTitle("Sembol Ekle")
-        val mAlertDialog = mBuilder.show()
+        val symbolDialogView = LayoutInflater.from(applicationContext).inflate(R.layout.dialog_add_symbol, null, false)
+        val symbolDialogBuilder = AlertDialog.Builder(this).setView(symbolDialogView).setTitle("Sembol Ekle")
+        val symbolAlertDialog = symbolDialogBuilder.show()
 
-        mDialogView.findViewById<Button>(R.id.dialogAddBtn).setOnClickListener {
-            mAlertDialog.dismiss()
+        symbolDialogView.findViewById<Button>(R.id.btnDialogSymbolAdd).setOnClickListener {
+            symbolAlertDialog.dismiss()
 
-            val symbolName = mDialogView.findViewById<EditText>(R.id.etDialogAddSymbol).text.toString()
+            val symbolName = symbolDialogView.findViewById<EditText>(R.id.etDialogSymbolAdd).text.toString()
 
-            val insertedID = DataProvider.addSymbol(symbolName)
+            GlobalScope.launch {
+                if (DataProvider.symbolExists(symbolName)) {
+                    withContext(Dispatchers.Main) {
+                        val alertDialog = AlertDialog.Builder(this@MainActivity)
+                        alertDialog.setTitle("Dikkat")
+                        alertDialog.setMessage("Sembol zaten var!")
+                        alertDialog.setCancelable(true)
+                        alertDialog.setNeutralButton("Tamam") { _, _ -> }
+                        alertDialog.show()
+                    }
+                } else {
+                    val insertedID = DataProvider.addSymbol(symbolName)
 
-            var symbol = Symbol()
-            symbol.symbolID = insertedID
-            symbol.symbolName = symbolName
-            symbolListAdapter.symbolList.add(symbol)
-            symbolListAdapter.notifyDataSetChanged()
+                    val symbol = Symbol()
+                    symbol.symbolID = insertedID
+                    symbol.symbolName = symbolName
+                    symbolListAdapter.symbolList.add(symbol)
+
+                    withContext(Dispatchers.Main) {
+                        symbolListAdapter.notifyDataSetChanged()
+                    }
+                }
+            }
         }
-        mDialogView.findViewById<Button>(R.id.dialogCancelBtn).setOnClickListener {
-            mAlertDialog.dismiss()
+        symbolDialogView.findViewById<Button>(R.id.btnDialogSymbolCancel).setOnClickListener {
+            symbolAlertDialog.dismiss()
+        }
+    }
+
+    private fun addBuySellDialog() {
+        val nullParent : ViewGroup? = null
+        buySellDialogView = LayoutInflater.from(applicationContext).inflate(R.layout.dialog_add_buysell, nullParent, false)
+        val buySellDialogBuilder = AlertDialog.Builder(this).setView(buySellDialogView).setTitle("Alım Satım Gir")
+        val buySellAlertDialog = buySellDialogBuilder.show()
+
+        buySellDialogView.findViewById<TextView>(R.id.tvDialogBuySellSymbol).text = selectedBuySellSymbol
+
+        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+        val currentDate = sdf.format(Date())
+        buySellDialogView.findViewById<TextView>(R.id.tvDialogBuySellDateTime).text = currentDate
+
+        buySellDialogView.findViewById<Button>(R.id.btnDateTimePicker)?.setOnClickListener {
+            val calendar: Calendar = Calendar.getInstance()
+            day = calendar.get(Calendar.DAY_OF_MONTH)
+            month = calendar.get(Calendar.MONTH)
+            year = calendar.get(Calendar.YEAR)
+            val datePickerDialog =
+                DatePickerDialog(this@MainActivity, this@MainActivity, year, month,day)
+            datePickerDialog.show()
+        }
+
+        buySellDialogView.findViewById<Button>(R.id.btnDialogBuySellAdd).setOnClickListener {
+            buySellAlertDialog.dismiss()
+
+            val pieces = buySellDialogView.findViewById<EditText>(R.id.etPieces).text.toString()
+            val value = buySellDialogView.findViewById<EditText>(R.id.etValue).text.toString()
+            val totalCost = pieces.toBigDecimal().multiply(value.toBigDecimal())
+            val dateTime = buySellDialogView.findViewById<TextView>(R.id.tvDialogBuySellDateTime).text.toString()
+
+            GlobalScope.launch {
+                val buySell = BuySell()
+                buySell.pieces = pieces.toLong()
+                buySell.value = value
+                buySell.totalCost = totalCost.toString()
+                buySell.dateTime = dateTime
+                buySell.fkSymbolID = DataProvider.getSymbolId(selectedBuySellSymbol)
+
+                val insertedID = DataProvider.addBuySell(buySell)
+
+                buySell.recordID = insertedID
+                buySellListAdapter.buySellList.add(buySell)
+
+                withContext(Dispatchers.Main) {
+                    buySellListAdapter.notifyDataSetChanged()
+                }
+            }
+
+            findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.action_BuySellListFragment_to_SymbolListFragment)
+        }
+        buySellDialogView.findViewById<Button>(R.id.btnDialogBuySellCancel).setOnClickListener {
+            buySellAlertDialog.dismiss()
         }
     }
 
     private fun showTotalInvestmentDialog() {
-        val alertDialog = AlertDialog.Builder(this)
-        alertDialog.setTitle("Anapara")
-        alertDialog.setMessage(DataProvider.getTotalInvestment())
-        alertDialog.setCancelable(true)
-        alertDialog.setNeutralButton("Tamam") { _, _ ->  }
-        alertDialog.show()
+        GlobalScope.launch {
+            val message = DataProvider.getTotalInvestment()
+
+            withContext(Dispatchers.Main) {
+                val alertDialog = AlertDialog.Builder(this@MainActivity)
+                alertDialog.setTitle("Anapara")
+                alertDialog.setMessage(message)
+                alertDialog.setCancelable(true)
+                alertDialog.setNeutralButton("Tamam") { _, _ -> }
+                alertDialog.show()
+            }
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
+        selectedBuySellSymbol = "NULL"
+
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration)
                 || super.onSupportNavigateUp()
@@ -117,5 +221,28 @@ class MainActivity : AppCompatActivity() {
 
     fun setBuySellListAdapter(bsla : BuySellListAdapter) {
         buySellListAdapter = bsla
+    }
+
+    override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
+        myDay = dayOfMonth
+        myYear = year
+        myMonth = month + 1
+        val calendar: Calendar = Calendar.getInstance()
+        hour = calendar.get(Calendar.HOUR)
+        minute = calendar.get(Calendar.MINUTE)
+        val timePickerDialog = TimePickerDialog(this@MainActivity, this@MainActivity, hour, minute,
+            DateFormat.is24HourFormat(this))
+        timePickerDialog.show()
+    }
+
+    override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
+        myHour = hourOfDay
+        myMinute = minute
+        val txt = myYear.toString() + "-" + myMonth.toString().padStart(2, '0') + "-" + myDay.toString().padStart(2, '0') + " " + myHour.toString().padStart(2, '0') + ":" + myMinute.toString().padStart(2, '0')
+        buySellDialogView.findViewById<TextView>(R.id.tvDialogBuySellDateTime).text = txt
+    }
+
+    fun setSelectedBuySellSymbol(selectedSymbol: String) {
+        selectedBuySellSymbol = selectedSymbol
     }
 }

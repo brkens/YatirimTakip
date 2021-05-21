@@ -2,6 +2,7 @@ package com.bebsoft.yatirimtakip.adapter
 
 import android.app.AlertDialog
 import android.content.Context
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,11 +11,18 @@ import androidx.navigation.NavController
 import androidx.recyclerview.widget.RecyclerView
 import com.bebsoft.yatirimtakip.R
 import com.bebsoft.yatirimtakip.database.Symbol
-import com.bebsoft.yatirimtakip.DataProvider
-import com.bebsoft.yatirimtakip.SymbolListFragmentDirections
+import com.bebsoft.yatirimtakip.database.DataProvider
+import com.bebsoft.yatirimtakip.fragment.SymbolListFragmentDirections
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.math.BigDecimal
 
 class SymbolListAdapter(
-    val symbolList: MutableList<Symbol>, private val navController: NavController
+    var symbolList: MutableList<Symbol>,
+    var symbolNameMeanValueHashMap: HashMap<String, String>,
+    var symbolNameTotalPiecesHashMap: HashMap<String, Int>,
+    var symbolNameLivePriceHashMap: HashMap<String, String>,
+    private val navController: NavController
 ) : RecyclerView.Adapter<SymbolListAdapter.SymbolViewHolder>() {
 
     class SymbolViewHolder(itemView : View) : RecyclerView.ViewHolder(itemView)
@@ -37,8 +45,33 @@ class SymbolListAdapter(
         val curItem = symbolList[position]
 
         holder.itemView.apply {
+            val meanVal = symbolNameMeanValueHashMap[curItem.symbolName]
             findViewById<TextView>(R.id.tvSymbolListSymbol).text = curItem.symbolName
-            findViewById<TextView>(R.id.tvSymbolListMean).text = DataProvider.getMeanValue(curItem.symbolName)
+
+            val tvProfitLoss = findViewById<TextView>(R.id.tvProfitLoss)
+
+            val symbolVal = symbolNameLivePriceHashMap[curItem.symbolName]
+            if (!symbolVal.isNullOrEmpty() && !(meanVal.isNullOrEmpty() || meanVal == "NaN")) {
+                val profitLoss = (symbolVal.toBigDecimal() - meanVal.toBigDecimal()) * (symbolNameTotalPiecesHashMap[curItem.symbolName]?.toBigDecimal()!!)
+                val totalProfitLossStr: String
+                when {
+                    profitLoss > BigDecimal(0) -> {
+                        totalProfitLossStr = "+$profitLoss"
+                        tvProfitLoss.setTextColor(Color.rgb(123, 159, 46))
+                    }
+                    profitLoss < BigDecimal(0) -> {
+                        totalProfitLossStr = profitLoss.toString()
+                        tvProfitLoss.setTextColor(Color.RED)
+                    }
+                    else -> {
+                        totalProfitLossStr = "0"
+                        tvProfitLoss.setTextColor(Color.BLACK)
+                    }
+                }
+                tvProfitLoss.text = totalProfitLossStr
+            }
+
+            findViewById<TextView>(R.id.tvSymbolListMean).text = meanVal
         }
 
         holder.itemView.setOnClickListener {
@@ -57,10 +90,13 @@ class SymbolListAdapter(
             alert.setTitle("Emin misiniz?")
             alert.setMessage(message)
             alert.setPositiveButton("Evet") {_, _ ->
-                DataProvider.deleteSymbol(item.text.toString())
+                GlobalScope.launch {
+                    DataProvider.deleteSymbol(item.text.toString())
+                }
 
                 symbolList.removeIf{
-                        x: Symbol -> x.symbolName.equals(item.text.toString())
+                        x: Symbol ->
+                    x.symbolName == item.text.toString()
                 }
 
                 notifyDataSetChanged()

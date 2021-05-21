@@ -17,20 +17,20 @@ data class BuySell(
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "record_id")
-    val recordID : Long,
+    var recordID : Long = 0L,
 
     @ColumnInfo(name = "pieces")
-    val pieces : Long,
+    var pieces : Long = 0L,
 
     @ColumnInfo(name = "value")
-    val value : String,
+    var value : String = "X",
 
     @ColumnInfo(name = "total_cost")
-    val totalCost : String,
+    var totalCost : String = "X",
 
     @ColumnInfo(name = "date_time")
-    val dateTime : String,
+    var dateTime : String = "X",
 
     @ColumnInfo(name = "fk_symbol_id")
-    val fkSymbolID : Long
+    var fkSymbolID : Long = 0L
 )

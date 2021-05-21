@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/SymbolListFragment"
-        android:name="com.bebsoft.yatirimtakip.SymbolListFragment"
+        android:name="com.bebsoft.yatirimtakip.fragment.SymbolListFragment"
         android:label="@string/symbol_list_fragment_label"
         tools:layout="@layout/fragment_symbol_list">
 
@@ -17,7 +17,7 @@
     </fragment>
     <fragment
         android:id="@+id/BuySellListFragment"
-        android:name="com.bebsoft.yatirimtakip.BuySellListFragment"
+        android:name="com.bebsoft.yatirimtakip.fragment.BuySellListFragment"
         android:label="@string/buysell_list_fragment_label"
         tools:layout="@layout/fragment_buysell_list">
 

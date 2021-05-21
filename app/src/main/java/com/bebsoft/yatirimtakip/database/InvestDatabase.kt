@@ -25,8 +25,7 @@ abstract class InvestDatabase : RoomDatabase() {
                         context.applicationContext,
                         InvestDatabase::class.java,
                         "investdatabase.db"
-                    ).allowMainThreadQueries()
-                        .build()
+                    ).build()
                     INSTANCE = instance
                 }
 
