@@ -23,8 +23,8 @@
     <string name="select_date_time">Tarih Seç</string>
     <string name="add">Ekle</string>
     <string name="cancel">İptal</string>
-    <string name="total_pieces">Toplam Adet: </string>
-    <string name="total_cost">Toplam Maliyet: </string>
+    <string name="total_pieces">Toplam Adet:</string>
+    <string name="total_cost">Toplam Maliyet:</string>
     <string name="default_pieces">0000</string>
     <string name="default_cost">0000.00</string>
     <string name="default_mean">00.00</string>

@@ -154,8 +154,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
             day = calendar.get(Calendar.DAY_OF_MONTH)
             month = calendar.get(Calendar.MONTH)
             year = calendar.get(Calendar.YEAR)
-            val datePickerDialog =
-                DatePickerDialog(this@MainActivity, this@MainActivity, year, month,day)
+            val datePickerDialog = DatePickerDialog(this@MainActivity, this@MainActivity, year, month,day)
             datePickerDialog.show()
         }
 
@@ -180,12 +179,16 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
                 buySell.recordID = insertedID
                 buySellListAdapter.buySellList.add(buySell)
 
+                val newTotalPieces = DataProvider.getTotalPieces(selectedBuySellSymbol).toString()
+                val newTotalCost = DataProvider.getTotalCost(selectedBuySellSymbol)
+
                 withContext(Dispatchers.Main) {
                     buySellListAdapter.notifyDataSetChanged()
+
+                    findViewById<TextView>(R.id.tvTotalPiecesNumber).text = newTotalPieces
+                    findViewById<TextView>(R.id.tvTotalCostValue).text = newTotalCost
                 }
             }
-
-            findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.action_BuySellListFragment_to_SymbolListFragment)
         }
         buySellDialogView.findViewById<Button>(R.id.btnDialogBuySellCancel).setOnClickListener {
             buySellAlertDialog.dismiss()

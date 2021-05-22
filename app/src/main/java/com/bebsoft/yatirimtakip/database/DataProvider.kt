@@ -2,8 +2,12 @@ package com.bebsoft.yatirimtakip.database
 
 import com.bebsoft.yatirimtakip.Constants
 import com.bebsoft.yatirimtakip.R
+import java.lang.Exception
 import java.math.BigDecimal
 import java.math.MathContext
+import java.math.RoundingMode
+import java.util.*
+import kotlin.collections.HashMap
 
 class DataProvider {
 
@@ -33,7 +37,8 @@ class DataProvider {
 
             var meanValue = Constants.emptyString
             if (sumOfPieces != 0) {
-                meanValue = String.format("%.2f", (sumOfTotalCosts.divide(sumOfPieces.toBigDecimal(), MathContext.DECIMAL32)))
+                val mean = sumOfTotalCosts.divide(sumOfPieces.toBigDecimal(), MathContext.DECIMAL32)
+                meanValue = mean.setScale(2, RoundingMode.UP).toString()
             }
 
             return meanValue
@@ -79,11 +84,17 @@ class DataProvider {
                 totalCost = totalCost.add(buySell.totalCost.toBigDecimal())
             }
 
-            return String.format("%.2f", totalCost)
+            return totalCost.setScale(2, RoundingMode.UP).toString()
         }
 
         suspend fun getTotalInvestment(): String {
-            return String.format("%.2f", investDatabase.buySellDao.getTotalInvestment())
+            var totalInv: Double = 0.0
+            try {
+                totalInv = investDatabase.buySellDao.getTotalInvestment()
+            } catch(e: Exception) {
+                return Constants.emptyString
+            }
+            return totalInv.toBigDecimal().setScale(2, RoundingMode.UP).toString()
         }
 
         suspend fun addSymbol(symbolName: String) : Long {

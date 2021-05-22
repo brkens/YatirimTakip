@@ -1,17 +1,21 @@
 package com.bebsoft.yatirimtakip.adapter
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.bebsoft.yatirimtakip.database.DataProvider
 import com.bebsoft.yatirimtakip.R
 import com.bebsoft.yatirimtakip.database.BuySell
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class BuySellListAdapter (
     var buySellList : MutableList<BuySell>
@@ -36,6 +40,10 @@ class BuySellListAdapter (
     override fun onBindViewHolder(holder: BuySellViewHolder, position: Int) {
         val curItem = buySellList[position]
 
+        val parentActivity = (parentContext as Activity)
+
+        val currentSymbol = parentActivity.findViewById<TextView>(R.id.tvBuySellFragmentSymbolName)?.text.toString()
+
         holder.itemView.apply {
             findViewById<TextView>(R.id.tvBuySellListPieces).text = curItem.pieces.toString()
             findViewById<TextView>(R.id.tvBuySellListValue).text = curItem.value
@@ -52,6 +60,13 @@ class BuySellListAdapter (
             alert.setPositiveButton(R.string.yes_text) {_, _ ->
                 GlobalScope.launch {
                     DataProvider.deleteBuySellRecord(curItem.recordID)
+                    val newTotalPieces = DataProvider.getTotalPieces(currentSymbol)
+                    val newTotalCost = DataProvider.getTotalCost(currentSymbol)
+
+                    withContext(Dispatchers.Main) {
+                        parentActivity.findViewById<TextView>(R.id.tvTotalPiecesNumber)?.text = newTotalPieces.toString()
+                        parentActivity.findViewById<TextView>(R.id.tvTotalCostValue)?.text = newTotalCost
+                    }
                 }
 
                 buySellList.removeIf {
