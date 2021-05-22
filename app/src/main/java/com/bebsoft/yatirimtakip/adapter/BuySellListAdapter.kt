@@ -47,9 +47,9 @@ class BuySellListAdapter (
             val message = "Alım satım kaydını silmek istiyor musunuz?"
 
             val alert = AlertDialog.Builder(parentContext)
-            alert.setTitle("Emin misiniz?")
+            alert.setTitle(R.string.are_you_sure)
             alert.setMessage(message)
-            alert.setPositiveButton("Evet") {_, _ ->
+            alert.setPositiveButton(R.string.yes_text) {_, _ ->
                 GlobalScope.launch {
                     DataProvider.deleteBuySellRecord(curItem.recordID)
                 }
@@ -60,7 +60,7 @@ class BuySellListAdapter (
 
                 notifyDataSetChanged()
             }
-            alert.setNegativeButton("Hayır") {_, _: Int -> }
+            alert.setNegativeButton(R.string.no_text) {_, _: Int -> }
             alert.show()
             true
         }

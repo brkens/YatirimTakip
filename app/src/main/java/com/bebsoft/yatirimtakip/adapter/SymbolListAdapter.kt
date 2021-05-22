@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.navigation.NavController
 import androidx.recyclerview.widget.RecyclerView
+import com.bebsoft.yatirimtakip.Constants
 import com.bebsoft.yatirimtakip.R
 import com.bebsoft.yatirimtakip.database.Symbol
 import com.bebsoft.yatirimtakip.database.DataProvider
@@ -51,7 +52,7 @@ class SymbolListAdapter(
             val tvProfitLoss = findViewById<TextView>(R.id.tvProfitLoss)
 
             val symbolVal = symbolNameLivePriceHashMap[curItem.symbolName]
-            if (!symbolVal.isNullOrEmpty() && !(meanVal.isNullOrEmpty() || meanVal == "NaN")) {
+            if (!symbolVal.isNullOrEmpty() && !(meanVal.isNullOrEmpty() || meanVal == Constants.emptyString)) {
                 val profitLoss = (symbolVal.toBigDecimal() - meanVal.toBigDecimal()) * (symbolNameTotalPiecesHashMap[curItem.symbolName]?.toBigDecimal()!!)
                 val totalProfitLossStr: String
                 when {
@@ -84,12 +85,12 @@ class SymbolListAdapter(
             val item: TextView = view.findViewById(R.id.tvSymbolListSymbol) as TextView
 
             val areYouSureStr = " sembolünü ve bu sembolle alakalı tüm alım satım kayıtlarını silmek istiyor musunuz?"
-            val message: String = item.text.toString() + " " + areYouSureStr
+            val message: String = item.text.toString() + areYouSureStr
 
             val alert = AlertDialog.Builder(parentContext)
-            alert.setTitle("Emin misiniz?")
+            alert.setTitle(R.string.are_you_sure)
             alert.setMessage(message)
-            alert.setPositiveButton("Evet") {_, _ ->
+            alert.setPositiveButton(R.string.yes_text) {_, _ ->
                 GlobalScope.launch {
                     DataProvider.deleteSymbol(item.text.toString())
                 }
@@ -101,7 +102,7 @@ class SymbolListAdapter(
 
                 notifyDataSetChanged()
             }
-            alert.setNegativeButton("Hayır") {_, _: Int -> }
+            alert.setNegativeButton(R.string.no_text) {_, _: Int -> }
             alert.show()
             true
         }

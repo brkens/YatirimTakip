@@ -1,5 +1,7 @@
 package com.bebsoft.yatirimtakip.database
 
+import com.bebsoft.yatirimtakip.Constants
+import com.bebsoft.yatirimtakip.R
 import java.math.BigDecimal
 import java.math.MathContext
 
@@ -29,7 +31,7 @@ class DataProvider {
                 sumOfPieces += record.pieces.toInt()
             }
 
-            var meanValue = "NaN"
+            var meanValue = Constants.emptyString
             if (sumOfPieces != 0) {
                 meanValue = String.format("%.2f", (sumOfTotalCosts.divide(sumOfPieces.toBigDecimal(), MathContext.DECIMAL32)))
             }

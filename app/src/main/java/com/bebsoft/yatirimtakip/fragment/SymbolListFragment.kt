@@ -1,10 +1,10 @@
 package com.bebsoft.yatirimtakip.fragment
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bebsoft.yatirimtakip.MainActivity
@@ -12,6 +12,7 @@ import com.bebsoft.yatirimtakip.adapter.SymbolListAdapter
 import com.bebsoft.yatirimtakip.database.DataProvider
 import com.bebsoft.yatirimtakip.database.Symbol
 import com.bebsoft.yatirimtakip.databinding.FragmentSymbolListBinding
+import com.bebsoft.yatirimtakip.helper.Helper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -60,7 +61,9 @@ class SymbolListFragment : Fragment() {
 
             kotlin.runCatching {
                 try {
-                    val url = "https://finans.mynet.com/borsa/hisseler/"
+                    val url = context?.let {
+                        Helper.getConfigValue(it, "stock_table_url")
+                    }
                     val document = Jsoup.connect(url).get()
                     val tableData = document.select("tbody.tbody-type-default").select("tr")
                     val tableSize = tableData.size

@@ -10,19 +10,19 @@
         android:id="@+id/tvDialogBuySellSymbol"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="SEMBOL"
+        android:text="@string/symbol_uppercase"
         android:textAlignment="center"/>
 
     <EditText
         android:id="@+id/etPieces"
-        android:hint="Lot"
+        android:hint="@string/pieces"
         android:inputType="numberSigned"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <EditText
         android:id="@+id/etValue"
-        android:hint="Değer"
+        android:hint="@string/value"
         android:inputType="numberDecimal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
@@ -36,7 +36,7 @@
             android:id="@+id/tvDialogBuySellDateTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="DATE-TIME"
+            android:text="@string/date_time_text"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"/>
 
@@ -44,7 +44,7 @@
             android:id="@+id/btnDateTimePicker"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="TARİH SEÇ"
+            android:text="@string/select_date_time"
             android:background="@color/teal_200"
             android:textColor="@color/black"
             android:layout_alignParentEnd="true"/>
@@ -57,13 +57,13 @@
         android:gravity="center">
         <Button
             android:id="@+id/btnDialogBuySellAdd"
-            android:text="Ekle"
+            android:text="@string/add"
             style="@style/Base.Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <Button
             android:id="@+id/btnDialogBuySellCancel"
-            android:text="İptal"
+            android:text="@string/cancel"
             style="@style/Base.Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />

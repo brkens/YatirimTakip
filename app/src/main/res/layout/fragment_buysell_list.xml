@@ -11,7 +11,7 @@
         android:id="@+id/tvBuySellFragmentSymbolName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="SYMBOL_NAME"
+        android:text="@string/symbol_description"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -21,7 +21,7 @@
         android:id="@+id/tvTotalPiecesText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Toplam Adet: "
+        android:text="@string/total_pieces"
         android:textStyle="italic"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvBuySellFragmentSymbolName" />
@@ -30,7 +30,7 @@
         android:id="@+id/tvTotalPiecesNumber"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="0000"
+        android:text="@string/default_pieces"
         app:layout_constraintStart_toEndOf="@+id/tvTotalPiecesText"
         app:layout_constraintTop_toBottomOf="@+id/tvBuySellFragmentSymbolName" />
 
@@ -38,7 +38,7 @@
         android:id="@+id/tvTotalCostText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Toplam Maliyet: "
+        android:text="@string/total_cost"
         android:textStyle="italic"
         app:layout_constraintEnd_toStartOf="@+id/tvTotalCostValue"
         app:layout_constraintTop_toBottomOf="@+id/tvBuySellFragmentSymbolName" />
@@ -47,7 +47,7 @@
         android:id="@+id/tvTotalCostValue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="0000.00"
+        android:text="@string/default_cost"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvBuySellFragmentSymbolName" />
 

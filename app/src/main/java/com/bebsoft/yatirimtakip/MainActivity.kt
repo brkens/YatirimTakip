@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
 
     private lateinit var buySellDialogView: View
 
-    private var selectedBuySellSymbol = "NULL"
+    private var selectedBuySellSymbol = Constants.emptyString
 
     private var day = 0
     private var month: Int = 0
@@ -79,12 +79,12 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
                 addSymbolDialog()
             }
             R.id.action_add_buy_sell -> {
-                if (selectedBuySellSymbol == "NULL") {
+                if (selectedBuySellSymbol == Constants.emptyString) {
                     val alertDialog = AlertDialog.Builder(this)
-                    alertDialog.setTitle("Uyarı")
-                    alertDialog.setMessage("Al/Sat kaydı girebilmek için listeden bir sembol seçiniz!")
+                    alertDialog.setTitle(R.string.warning)
+                    alertDialog.setMessage(R.string.select_symbol_message)
                     alertDialog.setCancelable(false)
-                    alertDialog.setNeutralButton("Tamam") { _, _ ->  }
+                    alertDialog.setNeutralButton(R.string.ok_text) { _, _ ->  }
                     alertDialog.show()
                 } else {
                     addBuySellDialog()
@@ -100,7 +100,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
 
     private fun addSymbolDialog() {
         val symbolDialogView = LayoutInflater.from(applicationContext).inflate(R.layout.dialog_add_symbol, null, false)
-        val symbolDialogBuilder = AlertDialog.Builder(this).setView(symbolDialogView).setTitle("Sembol Ekle")
+        val symbolDialogBuilder = AlertDialog.Builder(this).setView(symbolDialogView).setTitle(R.string.add_symbol)
         val symbolAlertDialog = symbolDialogBuilder.show()
 
         symbolDialogView.findViewById<Button>(R.id.btnDialogSymbolAdd).setOnClickListener {
@@ -112,10 +112,10 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
                 if (DataProvider.symbolExists(symbolName)) {
                     withContext(Dispatchers.Main) {
                         val alertDialog = AlertDialog.Builder(this@MainActivity)
-                        alertDialog.setTitle("Dikkat")
-                        alertDialog.setMessage("Sembol zaten var!")
+                        alertDialog.setTitle(R.string.attention)
+                        alertDialog.setMessage(R.string.symbol_already_exists)
                         alertDialog.setCancelable(true)
-                        alertDialog.setNeutralButton("Tamam") { _, _ -> }
+                        alertDialog.setNeutralButton(R.string.ok_text) { _, _ -> }
                         alertDialog.show()
                     }
                 } else {
@@ -140,7 +140,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
     private fun addBuySellDialog() {
         val nullParent : ViewGroup? = null
         buySellDialogView = LayoutInflater.from(applicationContext).inflate(R.layout.dialog_add_buysell, nullParent, false)
-        val buySellDialogBuilder = AlertDialog.Builder(this).setView(buySellDialogView).setTitle("Alım Satım Gir")
+        val buySellDialogBuilder = AlertDialog.Builder(this).setView(buySellDialogView).setTitle(R.string.add_buy_sell)
         val buySellAlertDialog = buySellDialogBuilder.show()
 
         buySellDialogView.findViewById<TextView>(R.id.tvDialogBuySellSymbol).text = selectedBuySellSymbol
@@ -198,17 +198,17 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
 
             withContext(Dispatchers.Main) {
                 val alertDialog = AlertDialog.Builder(this@MainActivity)
-                alertDialog.setTitle("Anapara")
+                alertDialog.setTitle(R.string.capital)
                 alertDialog.setMessage(message)
                 alertDialog.setCancelable(true)
-                alertDialog.setNeutralButton("Tamam") { _, _ -> }
+                alertDialog.setNeutralButton(R.string.ok_text) { _, _ -> }
                 alertDialog.show()
             }
         }
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        selectedBuySellSymbol = "NULL"
+        selectedBuySellSymbol = Constants.emptyString
 
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration)
