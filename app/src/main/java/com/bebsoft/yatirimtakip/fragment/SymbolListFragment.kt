@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import java.io.IOException
+import java.math.RoundingMode
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
@@ -61,19 +62,32 @@ class SymbolListFragment : Fragment() {
 
             kotlin.runCatching {
                 try {
-                    val url = context?.let {
+                    val stockUrl = context?.let {
                         Helper.getConfigValue(it, "stock_table_url")
                     }
-                    val document = Jsoup.connect(url).get()
-                    val tableData = document.select("tbody.tbody-type-default").select("tr")
-                    val tableSize = tableData.size
-
-                    for (i in 0 until tableSize) {
-                        val symbolWithDesc = tableData.eq(i).select("td").select("strong.mr-4").text()
+                    val stockDocument = Jsoup.connect(stockUrl).get()
+                    val stockTableData = stockDocument.select("tbody.tbody-type-default").select("tr")
+                    val stockTableSize = stockTableData.size
+                    for (i in 0 until stockTableSize) {
+                        val symbolWithDesc = stockTableData.eq(i).select("td").select("strong.mr-4").text()
                         val symbol = symbolWithDesc.split(" ")
-                        val value = tableData.eq(i).select("tr").select("td.text-center").eq(1).text()
-
+                        val value = stockTableData.eq(i).select("tr").select("td.text-center").eq(1).text()
                         symbolNameLivePriceHashMap[symbol[0]] = value
+                    }
+
+                    val fxUrl = context?.let {
+                        Helper.getConfigValue(it, "fx_table_url")
+                    }
+                    val fxDocument = Jsoup.connect(fxUrl).get()
+                    val fxTableData = fxDocument.select("table.table-detail").select("tbody").select("tr")
+                    for (i in 0 until 3) {
+                        val elements = fxTableData.eq(i).select("td")
+                        val currencySymbolStr = elements.select("td.text-title").select("a").text()
+                        val currencySymbolStrArr = currencySymbolStr.split(" ")
+                        val currencySymbol = currencySymbolStrArr[0]
+                        val currencyValueStr = elements.select("td.text-right").select("div").eq(0).text()
+                        val currencyValue = currencyValueStr.toBigDecimal().setScale(2, RoundingMode.DOWN).toString()
+                        symbolNameLivePriceHashMap[currencySymbol] = currencyValue
                     }
 
                     symbolListAdapter.symbolNameLivePriceHashMap = symbolNameLivePriceHashMap
