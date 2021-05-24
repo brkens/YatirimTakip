@@ -3,8 +3,10 @@
     <string name="add_symbol">Sembol Ekle</string>
     <string name="add_buy_sell">Alım Satım Gir</string>
     <string name="see_total">Toplamı Gör</string>
+    <string name="see_history">Geçmiş Kar/Zarar</string>
     <string name="symbol_list_fragment_label">Sembol Listesi</string>
     <string name="buysell_list_fragment_label">Alım/Satım Listesi</string>
+    <string name="history_list_fragment_label">Geçmiş Kar/Zarar Listesi</string>
     <string name="are_you_sure">Emin misiniz?</string>
     <string name="yes_text">Evet</string>
     <string name="no_text">Hayır</string>
@@ -34,4 +36,8 @@
     <string name="default_value_text_uppercase">VALUE</string>
     <string name="default_total_text_uppercase">TOTAL</string>
     <string name="not_available">\?\?</string>
+    <string name="history_calculation_info">Almış olduğunuz fakat henüz satmadığınız semboller !!! olarak görünmektedir ve hesaplamaya dahil edilmemiştir.</string>
+    <string name="history_title">Geçmiş Kâr/Zarar Listesi (Toplu)</string>
+    <string name="total_text">TOPLAM:</string>
+    <string name="not_calculated">!!!</string>
 </resources>

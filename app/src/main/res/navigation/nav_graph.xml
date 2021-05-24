@@ -14,6 +14,9 @@
         <action
             android:id="@+id/action_SymbolListFragment_to_BuySellListFragment"
             app:destination="@id/BuySellListFragment" />
+        <action
+            android:id="@+id/action_SymbolListFragment_to_historyFragment"
+            app:destination="@id/HistoryFragment" />
     </fragment>
     <fragment
         android:id="@+id/BuySellListFragment"
@@ -27,5 +30,17 @@
         <argument
             android:name="currentSymbol"
             app:argType="string" />
+        <action
+            android:id="@+id/action_BuySellListFragment_to_historyFragment"
+            app:destination="@id/HistoryFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/HistoryFragment"
+        android:name="com.bebsoft.yatirimtakip.fragment.HistoryFragment"
+        android:label="@string/history_list_fragment_label"
+        tools:layout="@layout/fragment_history" >
+        <action
+            android:id="@+id/action_historyFragment_to_SymbolListFragment"
+            app:destination="@id/SymbolListFragment" />
     </fragment>
 </navigation>

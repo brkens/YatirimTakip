@@ -20,6 +20,8 @@ import com.bebsoft.yatirimtakip.database.DataProvider
 import com.bebsoft.yatirimtakip.database.InvestDatabase
 import com.bebsoft.yatirimtakip.database.Symbol
 import com.bebsoft.yatirimtakip.databinding.ActivityMainBinding
+import com.bebsoft.yatirimtakip.fragment.BuySellListFragmentDirections
+import com.bebsoft.yatirimtakip.fragment.SymbolListFragmentDirections
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -70,6 +72,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
         menuInflater.inflate(R.menu.menu_add_symbol, menu)
         menuInflater.inflate(R.menu.menu_add_buy_sell, menu)
         menuInflater.inflate(R.menu.menu_see_total, menu)
+        menuInflater.inflate(R.menu.menu_see_history, menu)
         return true
     }
 
@@ -92,6 +95,17 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
             }
             R.id.action_see_total -> {
                 showTotalInvestmentDialog()
+            }
+            R.id.action_see_history -> {
+                val symbolListToHistoryAction = SymbolListFragmentDirections.actionSymbolListFragmentToHistoryFragment()
+                val buySellListToHistoryAction = BuySellListFragmentDirections.actionBuySellListFragmentToHistoryFragment()
+                val navController = findNavController(R.id.nav_host_fragment_content_main)
+                val destId = navController.currentDestination?.id
+                if (destId == R.id.SymbolListFragment) {
+                    navController.navigate(symbolListToHistoryAction)
+                } else if (destId == R.id.BuySellListFragment){
+                    navController.navigate(buySellListToHistoryAction)
+                }
             }
         }
 

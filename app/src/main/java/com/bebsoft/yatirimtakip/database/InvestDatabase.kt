@@ -25,7 +25,8 @@ abstract class InvestDatabase : RoomDatabase() {
                         context.applicationContext,
                         InvestDatabase::class.java,
                         "investdatabase.db"
-                    ).build()
+                    ).fallbackToDestructiveMigration()
+                        .build()
                     INSTANCE = instance
                 }
 
