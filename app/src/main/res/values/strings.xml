@@ -40,4 +40,5 @@
     <string name="history_title">Geçmiş Kâr/Zarar Listesi (Toplu)</string>
     <string name="total_text">TOPLAM:</string>
     <string name="not_calculated">!!!</string>
+    <string name="live_total_cost_text">Anlık Toplam Kar/Zarar:</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.bebsoft.yatirimtakip.fragment
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bebsoft.yatirimtakip.Constants
 import com.bebsoft.yatirimtakip.MainActivity
 import com.bebsoft.yatirimtakip.adapter.SymbolListAdapter
 import com.bebsoft.yatirimtakip.database.DataProvider
@@ -19,6 +21,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import java.io.IOException
+import java.math.BigDecimal
 import java.math.RoundingMode
 
 /**
@@ -96,8 +99,31 @@ class SymbolListFragment : Fragment() {
                 }
             }
 
+            var overAllTotalProfitLoss = BigDecimal(0)
+            for (symbol in symbolNameLivePriceHashMap.keys) {
+                val meanVal = symbolNameMeanValueHashMap[symbol]
+                val symbolVal = symbolNameLivePriceHashMap[symbol]
+                if (!symbolVal.isNullOrEmpty() && !(meanVal.isNullOrEmpty() || meanVal == Constants.emptyString)) {
+                    val profitLoss = (symbolVal.toBigDecimal() - meanVal.toBigDecimal()) * (symbolNameTotalPiecesHashMap[symbol]?.toBigDecimal()!!)
+                    overAllTotalProfitLoss = overAllTotalProfitLoss.add(profitLoss)
+                }
+            }
+
             withContext(Dispatchers.Main) {
                 symbolListAdapter.notifyDataSetChanged()
+
+                binding.tvSymvolListTotalCostValue.text = overAllTotalProfitLoss.setScale(2, RoundingMode.UP).toString()
+                when {
+                    overAllTotalProfitLoss > BigDecimal(0) -> {
+                        binding.tvSymvolListTotalCostValue.setTextColor(Color.rgb(123, 159, 46))
+                    }
+                    overAllTotalProfitLoss < BigDecimal(0) -> {
+                        binding.tvSymvolListTotalCostValue.setTextColor(Color.RED)
+                    }
+                    else -> {
+                        binding.tvSymvolListTotalCostValue.setTextColor(Color.BLACK)
+                    }
+                }
             }
         }
 

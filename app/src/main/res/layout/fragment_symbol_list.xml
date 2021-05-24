@@ -8,7 +8,7 @@
     tools:context=".fragment.SymbolListFragment">
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/tvSymbolListSymbolTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/symbol_uppercase"
@@ -18,15 +18,16 @@
         android:paddingEnd="12dp"/>
 
     <TextView
+        android:id="@+id/tvSymbolListProfitLossTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/profit_loss_title"
-        app:layout_constraintEnd_toStartOf="@+id/textView2"
-        app:layout_constraintStart_toEndOf="@+id/textView"
+        app:layout_constraintEnd_toStartOf="@+id/tvSymbolListMeanTitle"
+        app:layout_constraintStart_toEndOf="@+id/tvSymbolListSymbolTitle"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/tvSymbolListMeanTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/mean_title_uppercase"
@@ -37,6 +38,32 @@
         android:id="@+id/rvSymbolList"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@+id/tvSymbolListSymbolTitle" />
+
+    <TextView
+        android:id="@+id/tvSymbolListTotalCostText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/live_total_cost_text"
+        android:textAlignment="center"
+        android:textStyle="italic|bold"
+        android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintWidth_percent="0.499"
+        android:background="@color/gray"/>
+
+    <TextView
+        android:id="@+id/tvSymvolListTotalCostValue"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/default_cost"
+        android:textAlignment="center"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintWidth_percent="0.499"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:background="@color/gray"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
