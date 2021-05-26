@@ -1,5 +1,6 @@
 package com.bebsoft.yatirimtakip.helper
 
+import com.bebsoft.yatirimtakip.Constants
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.api.client.http.ByteArrayContent
@@ -24,12 +25,12 @@ class DriveServiceHelper (private val mDriveService: Drive) {
     fun uploadDBFile(): Task<String?>? {
         return Tasks.call(mExecutor, {
 
-            val myDbFile = java.io.File("/data/data/com.bebsoft.yatirimtakip/databases/investdatabase.db")
+            val myDbFile = java.io.File(Constants.DATABASE_FULL_PATH)
 
             val metadata = File()
                 .setParents(Collections.singletonList("root"))
                 .setMimeType("application/vnd.sqlite3")
-                .setName("investdatabase.db")
+                .setName(Constants.DATABASE_NAME_WITH_EXTENSION)
 
             val targetStream: InputStream = FileInputStream(myDbFile)
             val inputStreamContent = InputStreamContent("application/vnd.sqlite3", targetStream)
@@ -47,11 +48,11 @@ class DriveServiceHelper (private val mDriveService: Drive) {
     fun updateDBFile(fileId: String): Task<Void?>? {
         return Tasks.call(mExecutor, {
 
-            val myDbFile = java.io.File("/data/data/com.bebsoft.yatirimtakip/databases/investdatabase.db")
+            val myDbFile = java.io.File(Constants.DATABASE_FULL_PATH)
 
             val metadata = File()
                 .setMimeType("application/vnd.sqlite3")
-                .setName("investdatabase.db")
+                .setName(Constants.DATABASE_NAME_WITH_EXTENSION)
 
             val targetStream: InputStream = FileInputStream(myDbFile)
             val inputStreamContent = InputStreamContent("application/vnd.sqlite3", targetStream)
@@ -135,12 +136,13 @@ class DriveServiceHelper (private val mDriveService: Drive) {
             mDriveService.files()
                 .list()
                 .setSpaces("drive")
+                .setFields("nextPageToken, files(id, name)")
                 .execute()
         })
     }
 
     /**
-     * Get folder list created by Google Drive API
+     * Get folder list created by Google Drive API (Change root in setQ if you want another folder)
      */
     fun queryFolders(): Task<FileList?>? {
         return Tasks.call(mExecutor, {

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.bebsoft.yatirimtakip.Constants
 
 @Database(entities = [Symbol::class, BuySell::class], version = 1, exportSchema = false)
 abstract class InvestDatabase : RoomDatabase() {
@@ -24,7 +25,7 @@ abstract class InvestDatabase : RoomDatabase() {
                     instance = Room.databaseBuilder(
                         context.applicationContext,
                         InvestDatabase::class.java,
-                        "investdatabase.db"
+                        Constants.DATABASE_NAME_WITH_EXTENSION
                     ).fallbackToDestructiveMigration()
                         .setJournalMode(JournalMode.TRUNCATE)
                         .build()

@@ -1,12 +1,10 @@
 package com.bebsoft.yatirimtakip.database
 
 import com.bebsoft.yatirimtakip.Constants
-import com.bebsoft.yatirimtakip.R
 import java.lang.Exception
 import java.math.BigDecimal
 import java.math.MathContext
 import java.math.RoundingMode
-import java.util.*
 import kotlin.collections.HashMap
 
 class DataProvider {
@@ -35,7 +33,7 @@ class DataProvider {
                 sumOfPieces += record.pieces.toInt()
             }
 
-            var meanValue = Constants.emptyString
+            var meanValue = Constants.EMPTY_STRING
             if (sumOfPieces != 0) {
                 val mean = sumOfTotalCosts.divide(sumOfPieces.toBigDecimal(), MathContext.DECIMAL32)
                 meanValue = mean.setScale(2, RoundingMode.UP).toString()
@@ -92,7 +90,7 @@ class DataProvider {
             try {
                 totalInv = investDatabase.buySellDao.getTotalInvestment()
             } catch(e: Exception) {
-                return Constants.emptyString
+                return Constants.EMPTY_STRING
             }
             return totalInv.toBigDecimal().setScale(2, RoundingMode.UP).toString()
         }

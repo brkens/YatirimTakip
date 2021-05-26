@@ -7,10 +7,10 @@ import com.bebsoft.yatirimtakip.R
 import java.io.InputStream
 import java.util.*
 
-class Helper {
+class ConfigHelper {
 
     companion object {
-        private const val TAG = "Helper"
+        private const val TAG = "ConfigHelper"
 
         fun getConfigValue(context: Context, name: String?): String? {
             val resources: Resources = context.resources

@@ -5,7 +5,6 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import com.bebsoft.yatirimtakip.Constants
-import com.bebsoft.yatirimtakip.R
 
 @Entity(tableName = "buy_sell_table",
     foreignKeys = [
@@ -25,13 +24,13 @@ data class BuySell(
     var pieces : Long = 0L,
 
     @ColumnInfo(name = "value")
-    var value : String = Constants.emptyString,
+    var value : String = Constants.EMPTY_STRING,
 
     @ColumnInfo(name = "total_cost")
-    var totalCost : String = Constants.emptyString,
+    var totalCost : String = Constants.EMPTY_STRING,
 
     @ColumnInfo(name = "date_time")
-    var dateTime : String = Constants.emptyString,
+    var dateTime : String = Constants.EMPTY_STRING,
 
     @ColumnInfo(name = "fk_symbol_id", index = true)
     var fkSymbolID : Long = 0L

@@ -14,7 +14,7 @@ import com.bebsoft.yatirimtakip.adapter.SymbolListAdapter
 import com.bebsoft.yatirimtakip.database.DataProvider
 import com.bebsoft.yatirimtakip.database.Symbol
 import com.bebsoft.yatirimtakip.databinding.FragmentSymbolListBinding
-import com.bebsoft.yatirimtakip.helper.Helper
+import com.bebsoft.yatirimtakip.helper.ConfigHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -66,7 +66,7 @@ class SymbolListFragment : Fragment() {
             kotlin.runCatching {
                 try {
                     val stockUrl = context?.let {
-                        Helper.getConfigValue(it, "stock_table_url")
+                        ConfigHelper.getConfigValue(it, "stock_table_url")
                     }
                     val stockDocument = Jsoup.connect(stockUrl).get()
                     val stockTableData = stockDocument.select("tbody.tbody-type-default").select("tr")
@@ -79,7 +79,7 @@ class SymbolListFragment : Fragment() {
                     }
 
                     val fxUrl = context?.let {
-                        Helper.getConfigValue(it, "fx_table_url")
+                        ConfigHelper.getConfigValue(it, "fx_table_url")
                     }
                     val fxDocument = Jsoup.connect(fxUrl).get()
                     val fxTableData = fxDocument.select("table.table-detail").select("tbody").select("tr")
@@ -103,7 +103,7 @@ class SymbolListFragment : Fragment() {
             for (symbol in symbolNameLivePriceHashMap.keys) {
                 val meanVal = symbolNameMeanValueHashMap[symbol]
                 val symbolVal = symbolNameLivePriceHashMap[symbol]
-                if (!symbolVal.isNullOrEmpty() && !(meanVal.isNullOrEmpty() || meanVal == Constants.emptyString)) {
+                if (!symbolVal.isNullOrEmpty() && !(meanVal.isNullOrEmpty() || meanVal == Constants.EMPTY_STRING)) {
                     val profitLoss = (symbolVal.toBigDecimal() - meanVal.toBigDecimal()) * (symbolNameTotalPiecesHashMap[symbol]?.toBigDecimal()!!)
                     overAllTotalProfitLoss = overAllTotalProfitLoss.add(profitLoss)
                 }

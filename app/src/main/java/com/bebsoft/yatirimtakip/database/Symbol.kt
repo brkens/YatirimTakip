@@ -4,7 +4,6 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.bebsoft.yatirimtakip.Constants
-import com.bebsoft.yatirimtakip.R
 
 @Entity(tableName = "symbol_table")
 data class Symbol(
@@ -14,5 +13,5 @@ data class Symbol(
     var symbolID : Long = 0L,
 
     @ColumnInfo(name = "symbol_name")
-    var symbolName : String = Constants.emptyString
+    var symbolName : String = Constants.EMPTY_STRING
 )

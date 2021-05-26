@@ -52,7 +52,7 @@ class SymbolListAdapter(
             val tvProfitLoss = findViewById<TextView>(R.id.tvProfitLoss)
 
             val symbolVal = symbolNameLivePriceHashMap[curItem.symbolName]
-            if (!symbolVal.isNullOrEmpty() && !(meanVal.isNullOrEmpty() || meanVal == Constants.emptyString)) {
+            if (!symbolVal.isNullOrEmpty() && !(meanVal.isNullOrEmpty() || meanVal == Constants.EMPTY_STRING)) {
                 val profitLoss = (symbolVal.toBigDecimal() - meanVal.toBigDecimal()) * (symbolNameTotalPiecesHashMap[curItem.symbolName]?.toBigDecimal()!!)
                 val totalProfitLossStr: String
                 when {

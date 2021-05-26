@@ -28,7 +28,6 @@ import com.bebsoft.yatirimtakip.databinding.ActivityMainBinding
 import com.bebsoft.yatirimtakip.fragment.BuySellListFragmentDirections
 import com.bebsoft.yatirimtakip.fragment.SymbolListFragmentDirections
 import com.bebsoft.yatirimtakip.helper.DriveServiceHelper
-import com.bebsoft.yatirimtakip.helper.Helper
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -57,7 +56,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
     private lateinit var dialogLoading: AlertDialog
     private lateinit var client: GoogleSignInClient
 
-    private var selectedBuySellSymbol = Constants.emptyString
+    private var selectedBuySellSymbol = Constants.EMPTY_STRING
     private var day = 0
     private var month: Int = 0
     private var year: Int = 0
@@ -99,7 +98,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
                 addSymbolDialog()
             }
             R.id.action_add_buy_sell -> {
-                if (selectedBuySellSymbol == Constants.emptyString) {
+                if (selectedBuySellSymbol == Constants.EMPTY_STRING) {
                     val alertDialog = AlertDialog.Builder(this)
                     alertDialog.setTitle(R.string.warning)
                     alertDialog.setMessage(R.string.select_symbol_message)
@@ -273,29 +272,33 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
 
             setProgressDialog()
 
-            //this function is run once to generate file and get that file's id
-            /*driveServiceHelper.uploadDBFile()?.addOnSuccessListener {
-                dialogLoading.dismiss()
-                Toast.makeText(applicationContext, "Yükleme Başarılı", Toast.LENGTH_LONG).show()
-                Log.e("BURAK", it.toString())
+            var dbFileIdInDrive = Constants.EMPTY_STRING
+
+            driveServiceHelper.queryFiles()?.addOnSuccessListener {
+                val filesList = it?.files
+                if (filesList != null) {
+                    for (file in filesList) {
+                        if (file.name == Constants.DATABASE_NAME_WITH_EXTENSION) {
+                            dbFileIdInDrive = file.id
+                        }
+                    }
+
+                    if (dbFileIdInDrive == Constants.EMPTY_STRING) {
+                        dialogLoading.dismiss()
+                        Toast.makeText(applicationContext, "Dosya bulunamadı!", Toast.LENGTH_LONG).show()
+                    } else {
+                        driveServiceHelper.updateDBFile(dbFileIdInDrive)?.addOnSuccessListener {
+                            dialogLoading.dismiss()
+                            Toast.makeText(applicationContext, "Yükleme Başarılı", Toast.LENGTH_LONG).show()
+                        }?.addOnFailureListener {
+                            dialogLoading.dismiss()
+                            Toast.makeText(applicationContext, "Yüklenemedi!", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
             }?.addOnFailureListener {
                 dialogLoading.dismiss()
-                Toast.makeText(applicationContext, "Yüklenemedi!", Toast.LENGTH_LONG).show()
-            }*/
-
-            val dbFileIdInDrive = applicationContext?.let {
-                Helper.getConfigValue(it, "db_file_id_in_drive")
-            }
-            if (dbFileIdInDrive != null) {
-                driveServiceHelper.updateDBFile(dbFileIdInDrive)
-                    ?.addOnSuccessListener {
-                        dialogLoading.dismiss()
-                        Toast.makeText(applicationContext, "Yükleme Başarılı", Toast.LENGTH_LONG).show()
-                    }
-                    ?.addOnFailureListener {
-                        dialogLoading.dismiss()
-                        Toast.makeText(applicationContext, "Yüklenemedi!", Toast.LENGTH_LONG).show()
-                    }
+                Toast.makeText(applicationContext, "Dosya bulunamadı!", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -370,7 +373,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        selectedBuySellSymbol = Constants.emptyString
+        selectedBuySellSymbol = Constants.EMPTY_STRING
 
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration)
