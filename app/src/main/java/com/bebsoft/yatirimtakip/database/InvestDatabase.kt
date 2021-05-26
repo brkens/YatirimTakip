@@ -26,6 +26,7 @@ abstract class InvestDatabase : RoomDatabase() {
                         InvestDatabase::class.java,
                         "investdatabase.db"
                     ).fallbackToDestructiveMigration()
+                        .setJournalMode(JournalMode.TRUNCATE)
                         .build()
                     INSTANCE = instance
                 }

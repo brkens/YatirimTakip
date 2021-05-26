@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.bebsoft.yatirimtakip.MainActivity">
+    <item
+        android:id="@+id/action_sync_with_drive"
+        android:orderInCategory="100"
+        android:title="@string/sync_with_drive"
+        app:showAsAction="never" />
+</menu>

@@ -3,6 +3,7 @@
     <string name="add_symbol">Sembol Ekle</string>
     <string name="add_buy_sell">Alım Satım Gir</string>
     <string name="see_total">Toplamı Gör</string>
+    <string name="sync_with_drive">Drive\'a Gönder</string>
     <string name="see_history">Geçmiş Kar/Zarar</string>
     <string name="symbol_list_fragment_label">Sembol Listesi</string>
     <string name="buysell_list_fragment_label">Alım/Satım Listesi</string>
@@ -25,6 +26,7 @@
     <string name="select_date_time">Tarih Seç</string>
     <string name="add">Ekle</string>
     <string name="cancel">İptal</string>
+    <string name="send">Gönder</string>
     <string name="total_pieces">Toplam Adet:</string>
     <string name="total_cost">Toplam Maliyet:</string>
     <string name="default_pieces">0000</string>

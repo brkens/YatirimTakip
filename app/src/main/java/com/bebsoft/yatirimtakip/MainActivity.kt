@@ -2,11 +2,16 @@ package com.bebsoft.yatirimtakip
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.Intent
+import android.graphics.Color
 import android.icu.text.SimpleDateFormat
 import android.os.Bundle
 import android.text.format.DateFormat
+import android.util.Log
 import android.view.*
+import android.view.ViewGroup
 import android.widget.*
+import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -22,6 +27,17 @@ import com.bebsoft.yatirimtakip.database.Symbol
 import com.bebsoft.yatirimtakip.databinding.ActivityMainBinding
 import com.bebsoft.yatirimtakip.fragment.BuySellListFragmentDirections
 import com.bebsoft.yatirimtakip.fragment.SymbolListFragmentDirections
+import com.bebsoft.yatirimtakip.helper.DriveServiceHelper
+import com.bebsoft.yatirimtakip.helper.Helper
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.Scope
+import com.google.api.client.extensions.android.http.AndroidHttp
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
+import com.google.api.client.json.gson.GsonFactory
+import com.google.api.services.drive.Drive
+import com.google.api.services.drive.DriveScopes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -34,14 +50,14 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
-
     private lateinit var symbolListAdapter: SymbolListAdapter
     private lateinit var buySellListAdapter: BuySellListAdapter
-
     private lateinit var buySellDialogView: View
+    private lateinit var driveServiceHelper: DriveServiceHelper
+    private lateinit var dialogLoading: AlertDialog
+    private lateinit var client: GoogleSignInClient
 
     private var selectedBuySellSymbol = Constants.emptyString
-
     private var day = 0
     private var month: Int = 0
     private var year: Int = 0
@@ -73,6 +89,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
         menuInflater.inflate(R.menu.menu_add_buy_sell, menu)
         menuInflater.inflate(R.menu.menu_see_total, menu)
         menuInflater.inflate(R.menu.menu_see_history, menu)
+        menuInflater.inflate(R.menu.menu_sync_with_drive, menu)
         return true
     }
 
@@ -107,9 +124,44 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
                     navController.navigate(buySellListToHistoryAction)
                 }
             }
+            R.id.action_sync_with_drive -> {
+                sendToDriveDialog()
+            }
         }
 
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        when (requestCode) {
+            Constants.REQUEST_CODE_SIGN_IN -> {
+                if (resultCode == RESULT_OK) {
+                    handleSignInIntent(data)
+                }
+            }
+        }
+    }
+
+    private fun handleSignInIntent(data: Intent?) {
+        GoogleSignIn.getSignedInAccountFromIntent(data)
+            .addOnSuccessListener {
+                val credential: GoogleAccountCredential = GoogleAccountCredential
+                    .usingOAuth2(this@MainActivity, Collections.singleton(DriveScopes.DRIVE_FILE))
+
+                credential.selectedAccount = it.account
+
+                val googleDriveService: Drive = Drive.Builder(AndroidHttp.newCompatibleTransport(),
+                        GsonFactory.getDefaultInstance(),
+                        credential)
+                    .setApplicationName("YatirimTakip")
+                    .build()
+
+                driveServiceHelper = DriveServiceHelper(googleDriveService)
+            }.addOnFailureListener {
+                Toast.makeText(applicationContext, "Sign In başarısız!", Toast.LENGTH_LONG).show()
+            }
     }
 
     private fun addSymbolDialog() {
@@ -206,6 +258,99 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
         }
         buySellDialogView.findViewById<Button>(R.id.btnDialogBuySellCancel).setOnClickListener {
             buySellAlertDialog.dismiss()
+        }
+    }
+
+    private fun sendToDriveDialog() {
+        requestSignIn()
+
+        val sendDialogView = LayoutInflater.from(applicationContext).inflate(R.layout.dialog_upload_to_drive, null, false)
+        val sendDialogBuilder = AlertDialog.Builder(this).setView(sendDialogView).setTitle(R.string.sync_with_drive)
+        val sendAlertDialog = sendDialogBuilder.show()
+
+        sendDialogView.findViewById<Button>(R.id.btnDialogUpload).setOnClickListener {
+            sendAlertDialog.dismiss()
+
+            setProgressDialog()
+
+            //this function is run once to generate file and get that file's id
+            /*driveServiceHelper.uploadDBFile()?.addOnSuccessListener {
+                dialogLoading.dismiss()
+                Toast.makeText(applicationContext, "Yükleme Başarılı", Toast.LENGTH_LONG).show()
+                Log.e("BURAK", it.toString())
+            }?.addOnFailureListener {
+                dialogLoading.dismiss()
+                Toast.makeText(applicationContext, "Yüklenemedi!", Toast.LENGTH_LONG).show()
+            }*/
+
+            val dbFileIdInDrive = applicationContext?.let {
+                Helper.getConfigValue(it, "db_file_id_in_drive")
+            }
+            if (dbFileIdInDrive != null) {
+                driveServiceHelper.updateDBFile(dbFileIdInDrive)
+                    ?.addOnSuccessListener {
+                        dialogLoading.dismiss()
+                        Toast.makeText(applicationContext, "Yükleme Başarılı", Toast.LENGTH_LONG).show()
+                    }
+                    ?.addOnFailureListener {
+                        dialogLoading.dismiss()
+                        Toast.makeText(applicationContext, "Yüklenemedi!", Toast.LENGTH_LONG).show()
+                    }
+            }
+        }
+    }
+
+    private fun requestSignIn() {
+        val signInOptions: GoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestEmail()
+            .requestScopes(Scope(DriveScopes.DRIVE_FILE))
+            .build()
+
+        client = GoogleSignIn.getClient(this, signInOptions)
+
+        startActivityForResult(client.signInIntent, Constants.REQUEST_CODE_SIGN_IN)
+    }
+
+    private fun setProgressDialog() {
+        val llPadding = 30
+        val ll = LinearLayout(this)
+        ll.orientation = LinearLayout.HORIZONTAL
+        ll.setPadding(llPadding, llPadding, llPadding, llPadding)
+        ll.gravity = Gravity.CENTER
+        var llParam = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        llParam.gravity = Gravity.CENTER
+        ll.layoutParams = llParam
+        val progressBar = ProgressBar(this)
+        progressBar.isIndeterminate = true
+        progressBar.setPadding(0, 0, llPadding, 0)
+        progressBar.layoutParams = llParam
+        llParam = LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        llParam.gravity = Gravity.CENTER
+        val tvText = TextView(this)
+        tvText.text = "Yükleniyor ..."
+        tvText.setTextColor(Color.parseColor("#000000"))
+        tvText.textSize = 20f
+        tvText.layoutParams = llParam
+        ll.addView(progressBar)
+        ll.addView(tvText)
+        val builder = AlertDialog.Builder(this)
+        builder.setCancelable(true)
+        builder.setView(ll)
+        dialogLoading = builder.create()
+        dialogLoading.show()
+        val window = dialogLoading.window
+        if (window != null) {
+            val layoutParams = WindowManager.LayoutParams()
+            layoutParams.copyFrom(dialogLoading.window!!.attributes)
+            layoutParams.width = LinearLayout.LayoutParams.WRAP_CONTENT
+            layoutParams.height = LinearLayout.LayoutParams.WRAP_CONTENT
+            dialogLoading.window!!.attributes = layoutParams
         }
     }
 
