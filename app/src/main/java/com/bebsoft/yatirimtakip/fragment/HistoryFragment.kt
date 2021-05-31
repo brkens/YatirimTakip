@@ -5,7 +5,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bebsoft.yatirimtakip.Constants
 import com.bebsoft.yatirimtakip.R
 import com.bebsoft.yatirimtakip.adapter.HistoryListAdapter
 import com.bebsoft.yatirimtakip.database.DataProvider
@@ -37,30 +39,38 @@ class HistoryFragment : Fragment() {
         binding.rvHistory.layoutManager = LinearLayoutManager(context)
 
         GlobalScope.launch {
-            var totalProfitLoss = BigDecimal(0)
+            kotlin.runCatching {
+                var totalProfitLoss = BigDecimal(0)
 
-            val totalPiecesMap = DataProvider.getAllTotalPiecesMap()
+                val totalPiecesMap = DataProvider.getAllTotalPiecesMap()
 
-            val symbolList = DataProvider.getSymbolList()
-            for (symbol in symbolList) {
-                if (totalPiecesMap[symbol.symbolName] == 0) {
-                    val totalCostStr = DataProvider.getTotalCost(symbol.symbolName)
+                val symbolList = DataProvider.getSymbolList()
+                for (symbol in symbolList) {
+                    if (totalPiecesMap[symbol.symbolName] == 0) {
+                        val totalCostStr = DataProvider.getTotalCost(symbol.symbolName)
 
-                    val curTotalCost = totalCostStr.toBigDecimal().multiply(BigDecimal(-1))
+                        val curTotalCost = totalCostStr.toBigDecimal().multiply(BigDecimal(-1))
 
-                    symbolProfitlossMap[symbol.symbolName] = curTotalCost.toString()
+                        symbolProfitlossMap[symbol.symbolName] = curTotalCost.toString()
 
-                    totalProfitLoss = totalProfitLoss.add(curTotalCost)
-                } else {
-                    symbolProfitlossMap[symbol.symbolName] = "!!!"
+                        totalProfitLoss = totalProfitLoss.add(curTotalCost)
+                    } else {
+                        symbolProfitlossMap[symbol.symbolName] = "!!!"
+                    }
                 }
-            }
 
-            historyListAdapter.symbolNameProfitLossHashMap = symbolProfitlossMap
+                historyListAdapter.symbolNameProfitLossHashMap = symbolProfitlossMap
 
-            withContext(Dispatchers.Main) {
-                binding.tvHistoryTotalValue.text = totalProfitLoss.setScale(2, RoundingMode.UP).toString()
-                historyListAdapter.notifyDataSetChanged()
+                withContext(Dispatchers.Main) {
+                    binding.tvHistoryTotalValue.text = totalProfitLoss
+                        .setScale(2, RoundingMode.UP).toString()
+
+                    historyListAdapter.notifyDataSetChanged()
+                }
+            }.onFailure {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, Constants.ERROR_MESSAGE, Toast.LENGTH_LONG).show()
+                }
             }
         }
 

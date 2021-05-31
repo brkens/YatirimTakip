@@ -18,7 +18,6 @@ abstract class InvestDatabase : RoomDatabase() {
 
         fun getInstance(context: Context): InvestDatabase {
             synchronized(this) {
-
                 var instance = INSTANCE
 
                 if (instance == null) {

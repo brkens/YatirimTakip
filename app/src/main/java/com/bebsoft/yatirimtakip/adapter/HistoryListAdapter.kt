@@ -6,7 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.bebsoft.yatirimtakip.Constants
 import com.bebsoft.yatirimtakip.R
 
 class HistoryListAdapter(
@@ -33,8 +35,14 @@ class HistoryListAdapter(
         val curItem = symbolNameProfitLossHashMap.keys.sorted()[position]
 
         holder.itemView.apply {
-            findViewById<TextView>(R.id.tvHistoryItemSymbol).text = curItem
-            findViewById<TextView>(R.id.tvHistoryItemProfitLoss).text = symbolNameProfitLossHashMap[curItem]
+            try {
+                findViewById<TextView>(
+                    R.id.tvHistoryItemSymbol).text = curItem
+                findViewById<TextView>(
+                    R.id.tvHistoryItemProfitLoss).text = symbolNameProfitLossHashMap[curItem]
+            } catch (exc: Exception) {
+                Toast.makeText(parentContext, Constants.ERROR_MESSAGE, Toast.LENGTH_LONG).show()
+            }
         }
     }
 

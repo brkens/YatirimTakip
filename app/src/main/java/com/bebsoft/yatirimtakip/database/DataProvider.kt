@@ -22,21 +22,27 @@ class DataProvider {
         }
 
         private suspend fun getMeanValue(symbolName: String): String {
-            val symbolID = investDatabase.symbolDao.getSymbolID(symbolName)
-            val buySellRecordsList = investDatabase.buySellDao.getBuySellRecords(symbolID)
-
-            var sumOfTotalCosts = BigDecimal(0.0)
-            var sumOfPieces = 0
-
-            for (record in buySellRecordsList) {
-                sumOfTotalCosts = sumOfTotalCosts.add(record.totalCost.toBigDecimal())
-                sumOfPieces += record.pieces.toInt()
-            }
-
             var meanValue = Constants.EMPTY_STRING
-            if (sumOfPieces != 0) {
-                val mean = sumOfTotalCosts.divide(sumOfPieces.toBigDecimal(), MathContext.DECIMAL32)
-                meanValue = mean.setScale(2, RoundingMode.UP).toString()
+
+            try {
+                val symbolID = investDatabase.symbolDao.getSymbolID(symbolName)
+                val buySellRecordsList = investDatabase.buySellDao.getBuySellRecords(symbolID)
+
+                var sumOfTotalCosts = BigDecimal(0.0)
+                var sumOfPieces = 0
+
+                for (record in buySellRecordsList) {
+                    sumOfTotalCosts = sumOfTotalCosts.add(record.totalCost.toBigDecimal())
+                    sumOfPieces += record.pieces.toInt()
+                }
+
+                if (sumOfPieces != 0) {
+                    val mean =
+                        sumOfTotalCosts.divide(sumOfPieces.toBigDecimal(), MathContext.DECIMAL32)
+                    meanValue = mean.setScale(2, RoundingMode.UP).toString()
+                }
+            } catch (exc: Exception) {
+                exc.printStackTrace()
             }
 
             return meanValue
@@ -60,26 +66,34 @@ class DataProvider {
         }
 
         suspend fun getTotalPieces(currentSymbol: String): Int {
-            val symbolID = investDatabase.symbolDao.getSymbolID(currentSymbol)
-            val currentSymbolBuySellList = investDatabase.buySellDao.getBuySellRecords(symbolID)
-
             var totalPieces = 0
 
-            for (buySell in currentSymbolBuySellList) {
-                totalPieces += buySell.pieces.toInt()
+            try {
+                val symbolID = investDatabase.symbolDao.getSymbolID(currentSymbol)
+                val currentSymbolBuySellList = investDatabase.buySellDao.getBuySellRecords(symbolID)
+
+                for (buySell in currentSymbolBuySellList) {
+                    totalPieces += buySell.pieces.toInt()
+                }
+            } catch (exc: Exception) {
+                exc.printStackTrace()
             }
 
             return totalPieces
         }
 
         suspend fun getTotalCost(currentSymbol: String): String {
-            val symbolID = investDatabase.symbolDao.getSymbolID(currentSymbol)
-            val currentSymbolBuySellList = investDatabase.buySellDao.getBuySellRecords(symbolID)
-
             var totalCost = BigDecimal(0.0)
 
-            for (buySell in currentSymbolBuySellList) {
-                totalCost = totalCost.add(buySell.totalCost.toBigDecimal())
+            try {
+                val symbolID = investDatabase.symbolDao.getSymbolID(currentSymbol)
+                val currentSymbolBuySellList = investDatabase.buySellDao.getBuySellRecords(symbolID)
+
+                for (buySell in currentSymbolBuySellList) {
+                    totalCost = totalCost.add(buySell.totalCost.toBigDecimal())
+                }
+            } catch (exc: Exception) {
+                exc.printStackTrace()
             }
 
             return totalCost.setScale(2, RoundingMode.UP).toString()
@@ -87,11 +101,13 @@ class DataProvider {
 
         suspend fun getTotalInvestment(): String {
             var totalInv: Double = 0.0
+
             try {
                 totalInv = investDatabase.buySellDao.getTotalInvestment()
             } catch(e: Exception) {
                 return Constants.EMPTY_STRING
             }
+
             return totalInv.toBigDecimal().setScale(2, RoundingMode.UP).toString()
         }
 
@@ -112,19 +128,31 @@ class DataProvider {
 
         suspend fun getAllMeanValuesMap(): HashMap<String, String> {
             val map : HashMap<String, String> = HashMap()
-            val list = getSymbolList()
-            for (ele in list) {
-                map[ele.symbolName] = getMeanValue(ele.symbolName)
+
+            try {
+                val list = getSymbolList()
+                for (ele in list) {
+                    map[ele.symbolName] = getMeanValue(ele.symbolName)
+                }
+            } catch (exc: Exception) {
+                exc.printStackTrace()
             }
+
             return map
         }
 
         suspend fun getAllTotalPiecesMap(): HashMap<String, Int> {
             val map : HashMap<String, Int> = HashMap()
-            val list = getSymbolList()
-            for (ele in list) {
-                map[ele.symbolName] = getTotalPieces(ele.symbolName)
+
+            try {
+                val list = getSymbolList()
+                for (ele in list) {
+                    map[ele.symbolName] = getTotalPieces(ele.symbolName)
+                }
+            } catch (exc: Exception) {
+                exc.printStackTrace()
             }
+
             return map
         }
     }

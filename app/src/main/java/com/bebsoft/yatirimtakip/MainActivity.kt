@@ -7,7 +7,6 @@ import android.graphics.Color
 import android.icu.text.SimpleDateFormat
 import android.os.Bundle
 import android.text.format.DateFormat
-import android.util.Log
 import android.view.*
 import android.view.ViewGroup
 import android.widget.*
@@ -113,14 +112,23 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
                 showTotalInvestmentDialog()
             }
             R.id.action_see_history -> {
-                val symbolListToHistoryAction = SymbolListFragmentDirections.actionSymbolListFragmentToHistoryFragment()
-                val buySellListToHistoryAction = BuySellListFragmentDirections.actionBuySellListFragmentToHistoryFragment()
-                val navController = findNavController(R.id.nav_host_fragment_content_main)
-                val destId = navController.currentDestination?.id
-                if (destId == R.id.SymbolListFragment) {
-                    navController.navigate(symbolListToHistoryAction)
-                } else if (destId == R.id.BuySellListFragment){
-                    navController.navigate(buySellListToHistoryAction)
+                try {
+                    val symbolListToHistoryAction = SymbolListFragmentDirections
+                        .actionSymbolListFragmentToHistoryFragment()
+                    val buySellListToHistoryAction = BuySellListFragmentDirections
+                        .actionBuySellListFragmentToHistoryFragment()
+                    val navController = findNavController(R.id.nav_host_fragment_content_main)
+                    val destId = navController.currentDestination?.id
+                    if (destId == R.id.SymbolListFragment) {
+                        navController.navigate(symbolListToHistoryAction)
+                    } else if (destId == R.id.BuySellListFragment) {
+                        navController.navigate(buySellListToHistoryAction)
+                    }
+                } catch (exc: Exception) {
+                    Toast.makeText(applicationContext,
+                        Constants.ERROR_MESSAGE,
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
             R.id.action_sync_with_drive -> {
@@ -144,230 +152,388 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
     }
 
     private fun handleSignInIntent(data: Intent?) {
-        GoogleSignIn.getSignedInAccountFromIntent(data)
-            .addOnSuccessListener {
+        GoogleSignIn.getSignedInAccountFromIntent(data).addOnSuccessListener {
+            try {
                 val credential: GoogleAccountCredential = GoogleAccountCredential
-                    .usingOAuth2(this@MainActivity, Collections.singleton(DriveScopes.DRIVE_FILE))
+                    .usingOAuth2(
+                        this@MainActivity,
+                        Collections.singleton(DriveScopes.DRIVE_FILE)
+                    )
 
                 credential.selectedAccount = it.account
 
-                val googleDriveService: Drive = Drive.Builder(AndroidHttp.newCompatibleTransport(),
-                        GsonFactory.getDefaultInstance(),
-                        credential)
+                val googleDriveService: Drive = Drive.Builder(
+                    AndroidHttp.newCompatibleTransport(),
+                    GsonFactory.getDefaultInstance(),
+                    credential
+                )
                     .setApplicationName("YatirimTakip")
                     .build()
 
                 driveServiceHelper = DriveServiceHelper(googleDriveService)
-            }.addOnFailureListener {
-                Toast.makeText(applicationContext, "Sign In başarısız!", Toast.LENGTH_LONG).show()
+            } catch (exc: Exception) {
+                exc.printStackTrace()
             }
+        }.addOnFailureListener {
+            Toast.makeText(applicationContext,
+                "Sign In başarısız!",
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 
     private fun addSymbolDialog() {
-        val symbolDialogView = LayoutInflater.from(applicationContext).inflate(R.layout.dialog_add_symbol, null, false)
-        val symbolDialogBuilder = AlertDialog.Builder(this).setView(symbolDialogView).setTitle(R.string.add_symbol)
-        val symbolAlertDialog = symbolDialogBuilder.show()
+        try {
+            val symbolDialogView = LayoutInflater
+                .from(applicationContext)
+                .inflate(R.layout.dialog_add_symbol, null, false)
+            val symbolDialogBuilder = AlertDialog
+                .Builder(this)
+                .setView(symbolDialogView)
+                .setTitle(R.string.add_symbol)
+            val symbolAlertDialog = symbolDialogBuilder.show()
 
-        symbolDialogView.findViewById<Button>(R.id.btnDialogSymbolAdd).setOnClickListener {
-            symbolAlertDialog.dismiss()
+            symbolDialogView.findViewById<Button>(R.id.btnDialogSymbolAdd).setOnClickListener {
+                symbolAlertDialog.dismiss()
 
-            val symbolName = symbolDialogView.findViewById<EditText>(R.id.etDialogSymbolAdd).text.toString()
+                val symbolName = symbolDialogView
+                    .findViewById<EditText>(R.id.etDialogSymbolAdd).text.toString()
 
-            GlobalScope.launch {
-                if (DataProvider.symbolExists(symbolName)) {
-                    withContext(Dispatchers.Main) {
-                        val alertDialog = AlertDialog.Builder(this@MainActivity)
-                        alertDialog.setTitle(R.string.attention)
-                        alertDialog.setMessage(R.string.symbol_already_exists)
-                        alertDialog.setCancelable(true)
-                        alertDialog.setNeutralButton(R.string.ok_text) { _, _ -> }
-                        alertDialog.show()
-                    }
-                } else {
-                    val insertedID = DataProvider.addSymbol(symbolName)
+                GlobalScope.launch {
+                    kotlin.runCatching {
+                        if (DataProvider.symbolExists(symbolName)) {
+                            withContext(Dispatchers.Main) {
+                                val alertDialog = AlertDialog.Builder(this@MainActivity)
+                                alertDialog.setTitle(R.string.attention)
+                                alertDialog.setMessage(R.string.symbol_already_exists)
+                                alertDialog.setCancelable(true)
+                                alertDialog.setNeutralButton(R.string.ok_text) { _, _ -> }
+                                alertDialog.show()
+                            }
+                        } else {
+                            val insertedID = DataProvider.addSymbol(symbolName)
 
-                    val symbol = Symbol()
-                    symbol.symbolID = insertedID
-                    symbol.symbolName = symbolName
-                    symbolListAdapter.symbolList.add(symbol)
+                            val symbol = Symbol()
+                            symbol.symbolID = insertedID
+                            symbol.symbolName = symbolName
+                            symbolListAdapter.symbolList.add(symbol)
 
-                    withContext(Dispatchers.Main) {
-                        symbolListAdapter.notifyDataSetChanged()
+                            withContext(Dispatchers.Main) {
+                                symbolListAdapter.notifyDataSetChanged()
+                            }
+                        }
+                    }.onFailure {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(applicationContext,
+                                Constants.ERROR_MESSAGE,
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
                     }
                 }
             }
-        }
-        symbolDialogView.findViewById<Button>(R.id.btnDialogSymbolCancel).setOnClickListener {
-            symbolAlertDialog.dismiss()
+
+            symbolDialogView.findViewById<Button>(R.id.btnDialogSymbolCancel).setOnClickListener {
+                symbolAlertDialog.dismiss()
+            }
+        } catch (exc: Exception) {
+            Toast.makeText(applicationContext,
+                Constants.ERROR_MESSAGE,
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
     private fun addBuySellDialog() {
-        val nullParent : ViewGroup? = null
-        buySellDialogView = LayoutInflater.from(applicationContext).inflate(R.layout.dialog_add_buysell, nullParent, false)
-        val buySellDialogBuilder = AlertDialog.Builder(this).setView(buySellDialogView).setTitle(R.string.add_buy_sell)
-        val buySellAlertDialog = buySellDialogBuilder.show()
+        try {
+            val nullParent: ViewGroup? = null
+            buySellDialogView = LayoutInflater.from(applicationContext)
+                .inflate(R.layout.dialog_add_buysell, nullParent, false)
+            val buySellDialogBuilder = AlertDialog.Builder(this)
+                    .setView(buySellDialogView).setTitle(R.string.add_buy_sell)
+            val buySellAlertDialog = buySellDialogBuilder.show()
 
-        buySellDialogView.findViewById<TextView>(R.id.tvDialogBuySellSymbol).text = selectedBuySellSymbol
+            buySellDialogView.findViewById<TextView>(R.id.tvDialogBuySellSymbol).text =
+                selectedBuySellSymbol
 
-        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-        val currentDate = sdf.format(Date())
-        buySellDialogView.findViewById<TextView>(R.id.tvDialogBuySellDateTime).text = currentDate
+            val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+            val currentDate = sdf.format(Date())
+            buySellDialogView.findViewById<TextView>(R.id.tvDialogBuySellDateTime).text =
+                currentDate
 
-        buySellDialogView.findViewById<Button>(R.id.btnDateTimePicker)?.setOnClickListener {
-            val calendar: Calendar = Calendar.getInstance()
-            day = calendar.get(Calendar.DAY_OF_MONTH)
-            month = calendar.get(Calendar.MONTH)
-            year = calendar.get(Calendar.YEAR)
-            val datePickerDialog = DatePickerDialog(this@MainActivity, this@MainActivity, year, month,day)
-            datePickerDialog.show()
-        }
-
-        buySellDialogView.findViewById<Button>(R.id.btnDialogBuySellAdd).setOnClickListener {
-            buySellAlertDialog.dismiss()
-
-            val pieces = buySellDialogView.findViewById<EditText>(R.id.etPieces).text.toString()
-            val value = buySellDialogView.findViewById<EditText>(R.id.etValue).text.toString()
-            val totalCost = pieces.toBigDecimal().multiply(value.toBigDecimal())
-            val dateTime = buySellDialogView.findViewById<TextView>(R.id.tvDialogBuySellDateTime).text.toString()
-
-            GlobalScope.launch {
-                val buySell = BuySell()
-                buySell.pieces = pieces.toLong()
-                buySell.value = value
-                buySell.totalCost = totalCost.toString()
-                buySell.dateTime = dateTime
-                buySell.fkSymbolID = DataProvider.getSymbolId(selectedBuySellSymbol)
-
-                val insertedID = DataProvider.addBuySell(buySell)
-
-                buySell.recordID = insertedID
-                buySellListAdapter.buySellList.add(buySell)
-
-                val newTotalPieces = DataProvider.getTotalPieces(selectedBuySellSymbol).toString()
-                val newTotalCost = DataProvider.getTotalCost(selectedBuySellSymbol)
-
-                withContext(Dispatchers.Main) {
-                    buySellListAdapter.notifyDataSetChanged()
-
-                    findViewById<TextView>(R.id.tvTotalPiecesNumber).text = newTotalPieces
-                    findViewById<TextView>(R.id.tvTotalCostValue).text = newTotalCost
+            buySellDialogView.findViewById<Button>(R.id.btnDateTimePicker)?.setOnClickListener {
+                try {
+                    val calendar: Calendar = Calendar.getInstance()
+                    day = calendar.get(Calendar.DAY_OF_MONTH)
+                    month = calendar.get(Calendar.MONTH)
+                    year = calendar.get(Calendar.YEAR)
+                    val datePickerDialog = DatePickerDialog(
+                        this@MainActivity,
+                        this@MainActivity, year, month, day
+                    )
+                    datePickerDialog.show()
+                } catch (exc: Exception) {
+                    Toast.makeText(applicationContext,
+                        Constants.ERROR_MESSAGE,
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
-        }
-        buySellDialogView.findViewById<Button>(R.id.btnDialogBuySellCancel).setOnClickListener {
-            buySellAlertDialog.dismiss()
+
+            buySellDialogView.findViewById<Button>(R.id.btnDialogBuySellAdd).setOnClickListener {
+                try {
+                    buySellAlertDialog.dismiss()
+
+                    val pieces =
+                        buySellDialogView.findViewById<EditText>(R.id.etPieces).text.toString()
+                    val value =
+                        buySellDialogView.findViewById<EditText>(R.id.etValue).text.toString()
+                    val totalCost = pieces.toBigDecimal().multiply(value.toBigDecimal())
+                    val dateTime = buySellDialogView
+                        .findViewById<TextView>(R.id.tvDialogBuySellDateTime).text.toString()
+
+                    GlobalScope.launch {
+                        kotlin.runCatching {
+                            val buySell = BuySell()
+                            buySell.pieces = pieces.toLong()
+                            buySell.value = value
+                            buySell.totalCost = totalCost.toString()
+                            buySell.dateTime = dateTime
+                            buySell.fkSymbolID = DataProvider.getSymbolId(selectedBuySellSymbol)
+
+                            val insertedID = DataProvider.addBuySell(buySell)
+
+                            buySell.recordID = insertedID
+                            buySellListAdapter.buySellList.add(buySell)
+
+                            val newTotalPieces =
+                                DataProvider.getTotalPieces(selectedBuySellSymbol).toString()
+                            val newTotalCost = DataProvider.getTotalCost(selectedBuySellSymbol)
+
+                            withContext(Dispatchers.Main) {
+                                try {
+                                    buySellListAdapter.notifyDataSetChanged()
+
+                                    findViewById<TextView>(R.id.tvTotalPiecesNumber).text =
+                                        newTotalPieces
+                                    findViewById<TextView>(R.id.tvTotalCostValue).text =
+                                        newTotalCost
+                                } catch (exc: Exception) {
+                                    Toast.makeText(applicationContext,
+                                        Constants.ERROR_MESSAGE,
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
+                        }.onFailure {
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(applicationContext,
+                                    Constants.ERROR_MESSAGE,
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
+                    }
+                } catch (exc: Exception) {
+                    Toast.makeText(applicationContext,
+                        Constants.ERROR_MESSAGE,
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+
+            buySellDialogView.findViewById<Button>(R.id.btnDialogBuySellCancel).setOnClickListener {
+                try {
+                    buySellAlertDialog.dismiss()
+                } catch (exc: Exception) {
+                    Toast.makeText(applicationContext,
+                        Constants.ERROR_MESSAGE,
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        } catch (exc: Exception) {
+            Toast.makeText(applicationContext,
+                Constants.ERROR_MESSAGE,
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
     private fun sendToDriveDialog() {
         requestSignIn()
 
-        val sendDialogView = LayoutInflater.from(applicationContext).inflate(R.layout.dialog_upload_to_drive, null, false)
-        val sendDialogBuilder = AlertDialog.Builder(this).setView(sendDialogView).setTitle(R.string.sync_with_drive)
-        val sendAlertDialog = sendDialogBuilder.show()
+        try {
+            val sendDialogView = LayoutInflater.from(applicationContext)
+                .inflate(R.layout.dialog_upload_to_drive, null, false)
+            val sendDialogBuilder =
+                AlertDialog.Builder(this).setView(sendDialogView).setTitle(R.string.sync_with_drive)
+            val sendAlertDialog = sendDialogBuilder.show()
 
-        sendDialogView.findViewById<Button>(R.id.btnDialogUpload).setOnClickListener {
-            sendAlertDialog.dismiss()
+            sendDialogView.findViewById<Button>(R.id.btnDialogUpload).setOnClickListener {
+                sendAlertDialog.dismiss()
+                setProgressDialog()
+                var dbFileIdInDrive = Constants.EMPTY_STRING
 
-            setProgressDialog()
+                driveServiceHelper.queryFiles()?.addOnSuccessListener {
+                    try {
+                        val filesList = it?.files
+                        if (filesList != null) {
+                            for (file in filesList) {
+                                if (file.name == Constants.DATABASE_NAME_WITH_EXTENSION) {
+                                    dbFileIdInDrive = file.id
+                                }
+                            }
 
-            var dbFileIdInDrive = Constants.EMPTY_STRING
-
-            driveServiceHelper.queryFiles()?.addOnSuccessListener {
-                val filesList = it?.files
-                if (filesList != null) {
-                    for (file in filesList) {
-                        if (file.name == Constants.DATABASE_NAME_WITH_EXTENSION) {
-                            dbFileIdInDrive = file.id
+                            if (dbFileIdInDrive == Constants.EMPTY_STRING) {
+                                dialogLoading.dismiss()
+                                Toast.makeText(
+                                    applicationContext,
+                                    "Dosya bulunamadı!",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            } else {
+                                driveServiceHelper.updateDBFile(dbFileIdInDrive)
+                                    ?.addOnSuccessListener {
+                                        dialogLoading.dismiss()
+                                        Toast.makeText(
+                                            applicationContext,
+                                            "Yükleme Başarılı",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }?.addOnFailureListener {
+                                    dialogLoading.dismiss()
+                                    Toast.makeText(
+                                        applicationContext,
+                                        "Yüklenemedi!",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
                         }
+                    } catch (exc: Exception) {
+                        Toast.makeText(applicationContext,
+                            Constants.ERROR_MESSAGE,
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
-
-                    if (dbFileIdInDrive == Constants.EMPTY_STRING) {
+                }?.addOnFailureListener {
+                    try {
                         dialogLoading.dismiss()
-                        Toast.makeText(applicationContext, "Dosya bulunamadı!", Toast.LENGTH_LONG).show()
-                    } else {
-                        driveServiceHelper.updateDBFile(dbFileIdInDrive)?.addOnSuccessListener {
-                            dialogLoading.dismiss()
-                            Toast.makeText(applicationContext, "Yükleme Başarılı", Toast.LENGTH_LONG).show()
-                        }?.addOnFailureListener {
-                            dialogLoading.dismiss()
-                            Toast.makeText(applicationContext, "Yüklenemedi!", Toast.LENGTH_LONG).show()
-                        }
+                        Toast.makeText(applicationContext,
+                            "Dosya bulunamadı!",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    } catch (exc: Exception) {
+                        Toast.makeText(applicationContext,
+                            Constants.ERROR_MESSAGE,
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 }
-            }?.addOnFailureListener {
-                dialogLoading.dismiss()
-                Toast.makeText(applicationContext, "Dosya bulunamadı!", Toast.LENGTH_LONG).show()
             }
+        } catch (exc: Exception) {
+            Toast.makeText(applicationContext,
+                Constants.ERROR_MESSAGE,
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
     private fun requestSignIn() {
-        val signInOptions: GoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestEmail()
-            .requestScopes(Scope(DriveScopes.DRIVE_FILE))
-            .build()
+        try {
+            val signInOptions: GoogleSignInOptions =
+                GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestEmail()
+                    .requestScopes(Scope(DriveScopes.DRIVE_FILE))
+                    .build()
 
-        client = GoogleSignIn.getClient(this, signInOptions)
+            client = GoogleSignIn.getClient(this, signInOptions)
 
-        startActivityForResult(client.signInIntent, Constants.REQUEST_CODE_SIGN_IN)
+            startActivityForResult(client.signInIntent, Constants.REQUEST_CODE_SIGN_IN)
+        } catch (exc: Exception) {
+            Toast.makeText(applicationContext,
+                Constants.ERROR_MESSAGE,
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 
     private fun setProgressDialog() {
-        val llPadding = 30
-        val ll = LinearLayout(this)
-        ll.orientation = LinearLayout.HORIZONTAL
-        ll.setPadding(llPadding, llPadding, llPadding, llPadding)
-        ll.gravity = Gravity.CENTER
-        var llParam = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
-        llParam.gravity = Gravity.CENTER
-        ll.layoutParams = llParam
-        val progressBar = ProgressBar(this)
-        progressBar.isIndeterminate = true
-        progressBar.setPadding(0, 0, llPadding, 0)
-        progressBar.layoutParams = llParam
-        llParam = LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        llParam.gravity = Gravity.CENTER
-        val tvText = TextView(this)
-        tvText.text = "Yükleniyor ..."
-        tvText.setTextColor(Color.parseColor("#000000"))
-        tvText.textSize = 20f
-        tvText.layoutParams = llParam
-        ll.addView(progressBar)
-        ll.addView(tvText)
-        val builder = AlertDialog.Builder(this)
-        builder.setCancelable(true)
-        builder.setView(ll)
-        dialogLoading = builder.create()
-        dialogLoading.show()
-        val window = dialogLoading.window
-        if (window != null) {
-            val layoutParams = WindowManager.LayoutParams()
-            layoutParams.copyFrom(dialogLoading.window!!.attributes)
-            layoutParams.width = LinearLayout.LayoutParams.WRAP_CONTENT
-            layoutParams.height = LinearLayout.LayoutParams.WRAP_CONTENT
-            dialogLoading.window!!.attributes = layoutParams
+        try {
+            val llPadding = 30
+            val ll = LinearLayout(this)
+            ll.orientation = LinearLayout.HORIZONTAL
+            ll.setPadding(llPadding, llPadding, llPadding, llPadding)
+            ll.gravity = Gravity.CENTER
+            var llParam = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            llParam.gravity = Gravity.CENTER
+            ll.layoutParams = llParam
+            val progressBar = ProgressBar(this)
+            progressBar.isIndeterminate = true
+            progressBar.setPadding(0, 0, llPadding, 0)
+            progressBar.layoutParams = llParam
+            llParam = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            llParam.gravity = Gravity.CENTER
+            val tvText = TextView(this)
+            tvText.text = "Yükleniyor ..."
+            tvText.setTextColor(Color.parseColor("#000000"))
+            tvText.textSize = 20f
+            tvText.layoutParams = llParam
+            ll.addView(progressBar)
+            ll.addView(tvText)
+            val builder = AlertDialog.Builder(this)
+            builder.setCancelable(true)
+            builder.setView(ll)
+            dialogLoading = builder.create()
+            dialogLoading.show()
+            val window = dialogLoading.window
+            if (window != null) {
+                val layoutParams = WindowManager.LayoutParams()
+                layoutParams.copyFrom(dialogLoading.window!!.attributes)
+                layoutParams.width = LinearLayout.LayoutParams.WRAP_CONTENT
+                layoutParams.height = LinearLayout.LayoutParams.WRAP_CONTENT
+                dialogLoading.window!!.attributes = layoutParams
+            }
+        } catch (exc: Exception) {
+            Toast.makeText(applicationContext,
+                Constants.ERROR_MESSAGE,
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
     private fun showTotalInvestmentDialog() {
         GlobalScope.launch {
-            val message = DataProvider.getTotalInvestment()
+            kotlin.runCatching {
+                val message = DataProvider.getTotalInvestment()
 
-            withContext(Dispatchers.Main) {
-                val alertDialog = AlertDialog.Builder(this@MainActivity)
-                alertDialog.setTitle(R.string.capital)
-                alertDialog.setMessage(message)
-                alertDialog.setCancelable(true)
-                alertDialog.setNeutralButton(R.string.ok_text) { _, _ -> }
-                alertDialog.show()
+                withContext(Dispatchers.Main) {
+                    try {
+                        val alertDialog = AlertDialog.Builder(this@MainActivity)
+                        alertDialog.setTitle(R.string.capital)
+                        alertDialog.setMessage(message)
+                        alertDialog.setCancelable(true)
+                        alertDialog.setNeutralButton(R.string.ok_text) { _, _ -> }
+                        alertDialog.show()
+                    } catch (exc: Exception) {
+                        Toast.makeText(applicationContext,
+                            Constants.ERROR_MESSAGE,
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }.onFailure {
+                Toast.makeText(applicationContext,
+                    Constants.ERROR_MESSAGE,
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
@@ -389,22 +555,42 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
     }
 
     override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
-        myDay = dayOfMonth
-        myYear = year
-        myMonth = month + 1
-        val calendar: Calendar = Calendar.getInstance()
-        hour = calendar.get(Calendar.HOUR)
-        minute = calendar.get(Calendar.MINUTE)
-        val timePickerDialog = TimePickerDialog(this@MainActivity, this@MainActivity, hour, minute,
-            DateFormat.is24HourFormat(this))
-        timePickerDialog.show()
+        try {
+            myDay = dayOfMonth
+            myYear = year
+            myMonth = month + 1
+            val calendar: Calendar = Calendar.getInstance()
+            hour = calendar.get(Calendar.HOUR)
+            minute = calendar.get(Calendar.MINUTE)
+            val timePickerDialog = TimePickerDialog(
+                this@MainActivity,
+                this@MainActivity, hour, minute, DateFormat.is24HourFormat(this)
+            )
+            timePickerDialog.show()
+        } catch (exc: Exception) {
+            Toast.makeText(applicationContext,
+                Constants.ERROR_MESSAGE,
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 
     override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
-        myHour = hourOfDay
-        myMinute = minute
-        val txt = myYear.toString() + "-" + myMonth.toString().padStart(2, '0') + "-" + myDay.toString().padStart(2, '0') + " " + myHour.toString().padStart(2, '0') + ":" + myMinute.toString().padStart(2, '0')
-        buySellDialogView.findViewById<TextView>(R.id.tvDialogBuySellDateTime).text = txt
+        try {
+            myHour = hourOfDay
+            myMinute = minute
+            val txt = myYear.toString() + "-" +
+                    myMonth.toString().padStart(2, '0') + "-" +
+                    myDay.toString().padStart(2, '0') + " " +
+                    myHour.toString().padStart(2, '0') + ":" +
+                    myMinute.toString().padStart(2, '0')
+            buySellDialogView.findViewById<TextView>(R.id.tvDialogBuySellDateTime).text = txt
+        } catch (exc: Exception) {
+            Toast.makeText(applicationContext,
+                Constants.ERROR_MESSAGE,
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 
     fun setSelectedBuySellSymbol(selectedSymbol: String) {
