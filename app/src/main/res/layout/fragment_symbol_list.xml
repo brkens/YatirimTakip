@@ -38,6 +38,7 @@
         android:id="@+id/rvSymbolList"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/tvSymbolListTotalCostText"
         app:layout_constraintTop_toBottomOf="@+id/tvSymbolListSymbolTitle" />
 
     <TextView

@@ -250,7 +250,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
             buySellDialogView = LayoutInflater.from(applicationContext)
                 .inflate(R.layout.dialog_add_buysell, nullParent, false)
             val buySellDialogBuilder = AlertDialog.Builder(this)
-                    .setView(buySellDialogView).setTitle(R.string.add_buy_sell)
+                .setView(buySellDialogView).setTitle(R.string.add_buy_sell)
             val buySellAlertDialog = buySellDialogBuilder.show()
 
             buySellDialogView.findViewById<TextView>(R.id.tvDialogBuySellSymbol).text =
@@ -402,13 +402,13 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
                                             Toast.LENGTH_LONG
                                         ).show()
                                     }?.addOnFailureListener {
-                                    dialogLoading.dismiss()
-                                    Toast.makeText(
-                                        applicationContext,
-                                        "Yüklenemedi!",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                }
+                                        dialogLoading.dismiss()
+                                        Toast.makeText(
+                                            applicationContext,
+                                            "Yüklenemedi!",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
                             }
                         }
                     } catch (exc: Exception) {
@@ -539,8 +539,6 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        selectedBuySellSymbol = Constants.EMPTY_STRING
-
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration)
                 || super.onSupportNavigateUp()

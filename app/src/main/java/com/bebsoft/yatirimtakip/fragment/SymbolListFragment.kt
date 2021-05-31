@@ -100,7 +100,7 @@ class SymbolListFragment : Fragment() {
                     val fcDocument = Jsoup.connect(fcUrl).get()
                     val fcTableData = fcDocument
                         .select("div.market-data").select("div.item")
-                    for (i in 0 until 3) {
+                    for (i in 0 until 4) {
                         val selectedElement = fcTableData.eq(i)
                         val currencySymbol = selectedElement
                             .select("span.name").text()
@@ -168,6 +168,7 @@ class SymbolListFragment : Fragment() {
             }
         }
 
+        (activity as MainActivity).setSelectedBuySellSymbol(Constants.EMPTY_STRING)
         (activity as MainActivity).setSymbolListAdapter(symbolListAdapter)
 
         return binding.root
