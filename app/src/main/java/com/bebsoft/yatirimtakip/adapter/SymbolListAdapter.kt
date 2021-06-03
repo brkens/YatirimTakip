@@ -20,6 +20,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 class SymbolListAdapter(
     var symbolList: MutableList<Symbol>,
@@ -80,7 +81,39 @@ class SymbolListAdapter(
                             tvProfitLoss.setTextColor(Color.BLACK)
                         }
                     }
-                    tvProfitLoss.text = totalProfitLossStr
+
+                    GlobalScope.launch {
+                        kotlin.runCatching {
+                            val totalCostStr = DataProvider.getTotalCost(curItem.symbolName)
+                            val totalCost = totalCostStr.toBigDecimal()
+
+                            val profitLossPercent = (profitLoss.divide(
+                                totalCost, 4, RoundingMode.UP)).multiply(
+                                    BigDecimal(100)).setScale(2, RoundingMode.UP)
+
+                            withContext(Dispatchers.Main) {
+                                val profitLossPercentStr: String = when {
+                                    profitLossPercent > BigDecimal(0) -> {
+                                        "(+$profitLossPercent%)"
+                                    }
+                                    profitLossPercent < BigDecimal(0) -> {
+                                        "($profitLossPercent%)"
+                                    }
+                                    else -> {
+                                        "0"
+                                    }
+                                }
+
+                                val tvProfitLossTxt = totalProfitLossStr + profitLossPercentStr
+                                tvProfitLoss.text = tvProfitLossTxt
+                            }
+                        }.onFailure {
+                            Toast.makeText(context,
+                                Constants.ERROR_MESSAGE,
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }
                 }
 
                 findViewById<TextView>(R.id.tvSymbolListMean).text = meanVal
