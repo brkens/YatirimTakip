@@ -46,28 +46,28 @@ import java.util.*
 class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
     TimePickerDialog.OnTimeSetListener {
 
-    private lateinit var appBarConfiguration: AppBarConfiguration
-    private lateinit var binding: ActivityMainBinding
-    private lateinit var symbolListAdapter: SymbolListAdapter
-    private lateinit var buySellListAdapter: BuySellListAdapter
-    private lateinit var buySellDialogView: View
-    private lateinit var driveServiceHelper: DriveServiceHelper
-    private lateinit var dialogLoading: AlertDialog
-    private lateinit var client: GoogleSignInClient
+    private lateinit var appBarConfiguration : AppBarConfiguration
+    private lateinit var binding : ActivityMainBinding
+    private lateinit var symbolListAdapter : SymbolListAdapter
+    private lateinit var buySellListAdapter : BuySellListAdapter
+    private lateinit var buySellDialogView : View
+    private lateinit var driveServiceHelper : DriveServiceHelper
+    private lateinit var dialogLoading : AlertDialog
+    private lateinit var client : GoogleSignInClient
 
     private var selectedBuySellSymbol = Constants.EMPTY_STRING
     private var day = 0
-    private var month: Int = 0
-    private var year: Int = 0
-    private var hour: Int = 0
-    private var minute: Int = 0
+    private var month : Int = 0
+    private var year : Int = 0
+    private var hour : Int = 0
+    private var minute : Int = 0
     private var myDay = 0
-    private var myMonth: Int = 0
-    private var myYear: Int = 0
-    private var myHour: Int = 0
-    private var myMinute: Int = 0
+    private var myMonth : Int = 0
+    private var myYear : Int = 0
+    private var myHour : Int = 0
+    private var myMinute : Int = 0
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -82,7 +82,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
         DataProvider.setDatabase(InvestDatabase.getInstance(applicationContext))
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+    override fun onCreateOptionsMenu(menu : Menu) : Boolean {
         menuInflater.inflate(R.menu.menu_add_symbol, menu)
         menuInflater.inflate(R.menu.menu_add_buy_sell, menu)
         menuInflater.inflate(R.menu.menu_see_total, menu)
@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    override fun onOptionsItemSelected(item : MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_add_symbol -> {
                 addSymbolDialog()
@@ -124,7 +124,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
                     } else if (destId == R.id.BuySellListFragment) {
                         navController.navigate(buySellListToHistoryAction)
                     }
-                } catch (exc: Exception) {
+                } catch (exc : Exception) {
                     Toast.makeText(applicationContext,
                         Constants.ERROR_MESSAGE,
                         Toast.LENGTH_LONG
@@ -139,7 +139,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
         return super.onOptionsItemSelected(item)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(requestCode : Int, resultCode : Int, data : Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         when (requestCode) {
@@ -151,10 +151,10 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
         }
     }
 
-    private fun handleSignInIntent(data: Intent?) {
+    private fun handleSignInIntent(data : Intent?) {
         GoogleSignIn.getSignedInAccountFromIntent(data).addOnSuccessListener {
             try {
-                val credential: GoogleAccountCredential = GoogleAccountCredential
+                val credential : GoogleAccountCredential = GoogleAccountCredential
                     .usingOAuth2(
                         this@MainActivity,
                         Collections.singleton(DriveScopes.DRIVE_FILE)
@@ -162,7 +162,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
 
                 credential.selectedAccount = it.account
 
-                val googleDriveService: Drive = Drive.Builder(
+                val googleDriveService : Drive = Drive.Builder(
                     AndroidHttp.newCompatibleTransport(),
                     GsonFactory.getDefaultInstance(),
                     credential
@@ -171,7 +171,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
                     .build()
 
                 driveServiceHelper = DriveServiceHelper(googleDriveService)
-            } catch (exc: Exception) {
+            } catch (exc : Exception) {
                 exc.printStackTrace()
             }
         }.addOnFailureListener {
@@ -236,7 +236,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
             symbolDialogView.findViewById<Button>(R.id.btnDialogSymbolCancel).setOnClickListener {
                 symbolAlertDialog.dismiss()
             }
-        } catch (exc: Exception) {
+        } catch (exc : Exception) {
             Toast.makeText(applicationContext,
                 Constants.ERROR_MESSAGE,
                 Toast.LENGTH_LONG
@@ -246,7 +246,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
 
     private fun addBuySellDialog() {
         try {
-            val nullParent: ViewGroup? = null
+            val nullParent : ViewGroup? = null
             buySellDialogView = LayoutInflater.from(applicationContext)
                 .inflate(R.layout.dialog_add_buysell, nullParent, false)
             val buySellDialogBuilder = AlertDialog.Builder(this)
@@ -263,7 +263,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
 
             buySellDialogView.findViewById<Button>(R.id.btnDateTimePicker)?.setOnClickListener {
                 try {
-                    val calendar: Calendar = Calendar.getInstance()
+                    val calendar : Calendar = Calendar.getInstance()
                     day = calendar.get(Calendar.DAY_OF_MONTH)
                     month = calendar.get(Calendar.MONTH)
                     year = calendar.get(Calendar.YEAR)
@@ -272,7 +272,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
                         this@MainActivity, year, month, day
                     )
                     datePickerDialog.show()
-                } catch (exc: Exception) {
+                } catch (exc : Exception) {
                     Toast.makeText(applicationContext,
                         Constants.ERROR_MESSAGE,
                         Toast.LENGTH_LONG
@@ -289,8 +289,8 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
                     val value =
                         buySellDialogView.findViewById<EditText>(R.id.etValue).text.toString()
                     val totalCost = pieces.toBigDecimal().multiply(value.toBigDecimal())
-                    val dateTime = buySellDialogView
-                        .findViewById<TextView>(R.id.tvDialogBuySellDateTime).text.toString()
+                    val dateTime = buySellDialogView.findViewById<TextView>(
+                        R.id.tvDialogBuySellDateTime).text.toString()
 
                     GlobalScope.launch {
                         kotlin.runCatching {
@@ -318,7 +318,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
                                         newTotalPieces
                                     findViewById<TextView>(R.id.tvTotalCostValue).text =
                                         newTotalCost
-                                } catch (exc: Exception) {
+                                } catch (exc : Exception) {
                                     Toast.makeText(applicationContext,
                                         Constants.ERROR_MESSAGE,
                                         Toast.LENGTH_LONG
@@ -334,7 +334,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
                             }
                         }
                     }
-                } catch (exc: Exception) {
+                } catch (exc : Exception) {
                     Toast.makeText(applicationContext,
                         Constants.ERROR_MESSAGE,
                         Toast.LENGTH_LONG
@@ -345,14 +345,14 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
             buySellDialogView.findViewById<Button>(R.id.btnDialogBuySellCancel).setOnClickListener {
                 try {
                     buySellAlertDialog.dismiss()
-                } catch (exc: Exception) {
+                } catch (exc : Exception) {
                     Toast.makeText(applicationContext,
                         Constants.ERROR_MESSAGE,
                         Toast.LENGTH_LONG
                     ).show()
                 }
             }
-        } catch (exc: Exception) {
+        } catch (exc : Exception) {
             Toast.makeText(applicationContext,
                 Constants.ERROR_MESSAGE,
                 Toast.LENGTH_LONG
@@ -411,7 +411,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
                                     }
                             }
                         }
-                    } catch (exc: Exception) {
+                    } catch (exc : Exception) {
                         Toast.makeText(applicationContext,
                             Constants.ERROR_MESSAGE,
                             Toast.LENGTH_LONG
@@ -424,7 +424,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
                             "Dosya bulunamadı!",
                             Toast.LENGTH_LONG
                         ).show()
-                    } catch (exc: Exception) {
+                    } catch (exc : Exception) {
                         Toast.makeText(applicationContext,
                             Constants.ERROR_MESSAGE,
                             Toast.LENGTH_LONG
@@ -432,7 +432,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
                     }
                 }
             }
-        } catch (exc: Exception) {
+        } catch (exc : Exception) {
             Toast.makeText(applicationContext,
                 Constants.ERROR_MESSAGE,
                 Toast.LENGTH_LONG
@@ -442,7 +442,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
 
     private fun requestSignIn() {
         try {
-            val signInOptions: GoogleSignInOptions =
+            val signInOptions : GoogleSignInOptions =
                 GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestEmail()
                     .requestScopes(Scope(DriveScopes.DRIVE_FILE))
@@ -451,7 +451,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
             client = GoogleSignIn.getClient(this, signInOptions)
 
             startActivityForResult(client.signInIntent, Constants.REQUEST_CODE_SIGN_IN)
-        } catch (exc: Exception) {
+        } catch (exc : Exception) {
             Toast.makeText(applicationContext,
                 Constants.ERROR_MESSAGE,
                 Toast.LENGTH_LONG
@@ -501,7 +501,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
                 layoutParams.height = LinearLayout.LayoutParams.WRAP_CONTENT
                 dialogLoading.window!!.attributes = layoutParams
             }
-        } catch (exc: Exception) {
+        } catch (exc : Exception) {
             Toast.makeText(applicationContext,
                 Constants.ERROR_MESSAGE,
                 Toast.LENGTH_LONG
@@ -522,7 +522,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
                         alertDialog.setCancelable(true)
                         alertDialog.setNeutralButton(R.string.ok_text) { _, _ -> }
                         alertDialog.show()
-                    } catch (exc: Exception) {
+                    } catch (exc : Exception) {
                         Toast.makeText(applicationContext,
                             Constants.ERROR_MESSAGE,
                             Toast.LENGTH_LONG
@@ -530,10 +530,13 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
                     }
                 }
             }.onFailure {
-                Toast.makeText(applicationContext,
-                    Constants.ERROR_MESSAGE,
-                    Toast.LENGTH_LONG
-                ).show()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        applicationContext,
+                        Constants.ERROR_MESSAGE,
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             }
         }
     }
@@ -552,12 +555,12 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
         buySellListAdapter = bsla
     }
 
-    override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
+    override fun onDateSet(view : DatePicker?, year : Int, month : Int, dayOfMonth : Int) {
         try {
             myDay = dayOfMonth
             myYear = year
             myMonth = month + 1
-            val calendar: Calendar = Calendar.getInstance()
+            val calendar : Calendar = Calendar.getInstance()
             hour = calendar.get(Calendar.HOUR)
             minute = calendar.get(Calendar.MINUTE)
             val timePickerDialog = TimePickerDialog(
@@ -565,7 +568,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
                 this@MainActivity, hour, minute, DateFormat.is24HourFormat(this)
             )
             timePickerDialog.show()
-        } catch (exc: Exception) {
+        } catch (exc : Exception) {
             Toast.makeText(applicationContext,
                 Constants.ERROR_MESSAGE,
                 Toast.LENGTH_LONG
@@ -573,7 +576,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
         }
     }
 
-    override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
+    override fun onTimeSet(view : TimePicker?, hourOfDay : Int, minute : Int) {
         try {
             myHour = hourOfDay
             myMinute = minute
@@ -583,7 +586,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
                     myHour.toString().padStart(2, '0') + ":" +
                     myMinute.toString().padStart(2, '0')
             buySellDialogView.findViewById<TextView>(R.id.tvDialogBuySellDateTime).text = txt
-        } catch (exc: Exception) {
+        } catch (exc : Exception) {
             Toast.makeText(applicationContext,
                 Constants.ERROR_MESSAGE,
                 Toast.LENGTH_LONG
@@ -591,7 +594,7 @@ class MainActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener,
         }
     }
 
-    fun setSelectedBuySellSymbol(selectedSymbol: String) {
+    fun setSelectedBuySellSymbol(selectedSymbol : String) {
         selectedBuySellSymbol = selectedSymbol
     }
 }

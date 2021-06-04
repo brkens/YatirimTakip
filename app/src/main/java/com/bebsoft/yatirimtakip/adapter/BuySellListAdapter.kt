@@ -81,10 +81,13 @@ class BuySellListAdapter (
                                                     newTotalCost
                                     }
                                 }.onFailure {
-                                    Toast.makeText(parentContext,
-                                        Constants.ERROR_MESSAGE,
-                                        Toast.LENGTH_LONG
-                                    ).show()
+                                    withContext(Dispatchers.Main) {
+                                        Toast.makeText(
+                                            parentContext,
+                                            Constants.ERROR_MESSAGE,
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
                                 }
                             }
 

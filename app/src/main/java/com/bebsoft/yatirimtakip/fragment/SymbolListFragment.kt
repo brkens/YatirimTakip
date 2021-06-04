@@ -28,7 +28,7 @@ import java.math.RoundingMode
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
  */
-class SymbolListFragment : Fragment() {
+class SymbolListFragment: Fragment() {
 
     private var _binding: FragmentSymbolListBinding? = null
 
@@ -164,7 +164,9 @@ class SymbolListFragment : Fragment() {
                     }
                 }
             }.onFailure {
-                Toast.makeText(context, Constants.ERROR_MESSAGE, Toast.LENGTH_LONG).show()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, Constants.ERROR_MESSAGE, Toast.LENGTH_LONG).show()
+                }
             }
         }
 

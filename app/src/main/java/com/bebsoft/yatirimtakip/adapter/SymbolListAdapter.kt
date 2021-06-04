@@ -100,7 +100,7 @@ class SymbolListAdapter(
                                         "($profitLossPercent%)"
                                     }
                                     else -> {
-                                        "0"
+                                        "(0)"
                                     }
                                 }
 
@@ -108,10 +108,13 @@ class SymbolListAdapter(
                                 tvProfitLoss.text = tvProfitLossTxt
                             }
                         }.onFailure {
-                            Toast.makeText(context,
-                                Constants.ERROR_MESSAGE,
-                                Toast.LENGTH_LONG
-                            ).show()
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(
+                                    parentContext,
+                                    Constants.ERROR_MESSAGE,
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
                         }
                     }
                 }
